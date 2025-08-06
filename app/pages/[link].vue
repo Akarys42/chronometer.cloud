@@ -8,12 +8,12 @@
           <UIcon v-if="connection_status === 'disconnected' || connection_status === 'lost'" name="i-lucide-wifi-off" class="size-8 animate-pulsate" :class="connection_status === 'disconnected' ? 'text-warning' : 'text-error'" />
         </UTooltip>
       </div>
-      <p v-if="page.timers.length === 0" class="text-xl font-bold leading-none tracking-tight text-gray-800 dark:text-gray-300">No timers currently created.</p>
+      <p v-if="page.timers.length === 0" class="mt-5 text-xl font-bold leading-none tracking-tight text-gray-800 dark:text-gray-300">No timers currently created.</p>
     </div>
     <div v-for="(timer, timer_number) in page.timers">
       <Timer :timer="timer" :permissions="permissions" :link="route.params.link as string" :timer_number="timer_number" />
     </div>
-    <USeparator class="m-2" />
+    <USeparator v-if="permissions === 'edit'" class="m-2" />
 
     <div v-if="permissions === 'edit'" class="flex flex-col items-center justify-center gap-2 m-5">
       <h1 class="mb-4 text-3xl font-bold leading-none tracking-tight text-gray-900 dark:text-white">Create a new timer</h1>
@@ -22,10 +22,10 @@
     </div>
     <USeparator v-if="permissions === 'edit'" class="m-2" />
 
-    <div class="flex flex-col grow items-center justify-center gap-2 m-5">
+    <div v-if="permissions === 'edit'" class="flex flex-col grow items-center justify-center gap-2 m-5">
       <h1 class="mb-4 text-3xl font-bold leading-none tracking-tight text-gray-900 dark:text-white">Links</h1>
-      <span>Public link: <ULink :to="'/' + page.public_link">/{{ page.public_link }}</ULink></span>
-      <span v-if="permissions === 'edit'">Private editing link: <ULink :to="'/' + route.params.link">/{{ route.params.link }}</ULink></span>
+      <LinkElement text="Public viewing link:" :fragment="page.public_link"/>
+      <LinkElement text="Private editing link:" :fragment="route.params.link as string"/>
     </div>
   </div>
   <div v-else class="">
@@ -52,8 +52,8 @@
 </template>
 
 <script setup lang="ts">
-import DurationInput from "~/components/DurationInput.vue";
-import TailwindColorPicker from "~/components/TailwindColorPicker.vue";
+import { DurationInput, TailwindColorPicker, CopyButton} from "#components";
+import LinkElement from "~/components/LinkElement.vue";
 
 const backendUrl = useRuntimeConfig().public.backendUrl;
 const websocketBackendUrl = useRuntimeConfig().public.websocketBackendUrl;
