@@ -1,9 +1,9 @@
 <template>
     <div v-if="permissions !== 'loading'" class="flex flex-col">
-      <div class="flex flex-col w-full items-center gap-2 m-5">
-        <div class="flex w-full items-center justify-between">
+      <div class="flex flex-col items-center gap-2 m-5">
+        <div class="w-full relative">
           <h1 class="text-3xl font-bold leading-none tracking-tight text-gray-900 dark:text-white text-center grow">{{ page.name }}</h1>
-          <UButton v-if="permissions === 'edit'" icon="i-lucide-settings" size="xl" variant="outline" color="neutral" @click="open_settings"/>
+          <UButton v-if="permissions === 'edit'" class="absolute right-0 top-0" icon="i-lucide-settings" size="xl" variant="outline" color="neutral" @click="open_settings"/>
         </div>
         <p v-if="page.timers.length === 0" class="text-xl font-bold leading-none tracking-tight text-gray-800 dark:text-gray-300">No timers currently created.</p>
       </div>
@@ -180,6 +180,12 @@ function connect_websocket() {
   websocket.onopen = () => {
     retries = 10;
     console.log("WebSocket connection established");
+    toast.add({
+      title: "Connected",
+      description: "Successfully connected to the server. Timers will update in real-time.",
+      color: "success",
+      icon: "i-lucide-wifi",
+    });
   };
 
   websocket.onclose = (e) => {
