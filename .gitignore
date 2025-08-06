@@ -1,4 +1,5 @@
 .wrangler
+.yarn
 
 ## Nuxt
 node_modules
