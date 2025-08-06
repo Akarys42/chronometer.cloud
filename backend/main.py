@@ -1,15 +1,73 @@
 import asyncio
-from typing import NoReturn
+import os
+from contextlib import asynccontextmanager
+from typing import Any, AsyncGenerator, NoReturn
 
 from fastapi import FastAPI, HTTPException, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
+from pymongo import AsyncMongoClient
 from websockets import ConnectionClosed
 
 from backend.timer import Timer, TimerPage
 from backend.websocket_manager import WebsocketManager
 
-app = FastAPI()
+edit_links: dict[str, TimerPage] = {}
+public_links: dict[str, TimerPage] = {}
+websocket_manager = WebsocketManager()
+
+client = AsyncMongoClient(os.environ.get("MONGO_URI"))
+collection = client[os.environ.get("MONGO_DATABASE")].pages
+
+
+async def create_tld_index() -> None:
+    """Create the mongodb index that gives our storage a TTL."""
+    await collection.create_index("last_modified", expireAfterSeconds=7 * 24 * 60 * 60)
+
+
+async def reload_data() -> None:
+    """Reload data from the DB."""
+    async for document in collection.find():
+        timers = []
+
+        page = TimerPage(
+            websocket_manager,
+            collection,
+            timers=timers,
+            public_link=document["public_link"],
+            edit_link=document["edit_link"],
+            name=document["name"],
+            color=document["color"],
+        )
+
+        for timer in document["timers"]:
+            timers.append(
+                Timer(
+                    -1,  # doesn't matter as we override all the other attributes
+                    page,
+                    websocket_manager,
+                    unpaused_time=timer["unpaused_time"],
+                    remaining_duration=timer["remaining_duration"],
+                    is_paused=timer["is_paused"],
+                    full_duration=timer["full_duration"],
+                    name=timer["name"],
+                )
+            )
+        page.timers = timers
+
+        edit_links[document["edit_link"]] = page
+        public_links[document["public_link"]] = page
+
+
+@asynccontextmanager
+async def lifespan(_: FastAPI) -> AsyncGenerator[None, Any]:
+    """Run code during the lifespan of our app."""
+    await create_tld_index()
+    await reload_data()
+    yield
+
+
+app = FastAPI(lifespan=lifespan)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -17,10 +75,6 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
-edit_links: dict[str, TimerPage] = {}
-public_links: dict[str, TimerPage] = {}
-websocket_manager = WebsocketManager()
 
 
 class NewTimer(BaseModel):
@@ -39,7 +93,9 @@ class ModifyPageSettings(BaseModel):
 @app.post("/page/new")
 async def new_page() -> dict:
     """Create a new page."""
-    page = TimerPage(websocket_manager)
+    page = TimerPage(websocket_manager, collection)
+    await page.save()
+
     edit_links[page.edit_link] = page
     public_links[page.public_link] = page
 
@@ -136,7 +192,7 @@ async def modify_page_settings(edit_link: str, settings: ModifyPageSettings) -> 
     page.color = settings.color
 
     # Broadcast the updated settings to all connected websockets
-    await page.broadcast_update()
+    await page.save()
 
 
 @app.websocket("/subscribe/{link}")
