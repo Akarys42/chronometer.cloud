@@ -16,8 +16,9 @@
       </div>
 
       <footer class="border-t border-gray-200 dark:border-gray-800 bg-black/20">
-        <UContainer class="flex items-center justify-center gap-4 py-6 text-sm text-gray-500 dark:text-gray-400">
+        <UContainer class="flex flex-col items-center justify-center gap-4 py-6 text-sm text-gray-500 dark:text-gray-400">
           <p>Made with &lt;3 by Ambre Bertucci</p>
+          <p>Enjoying the tool? <a target="_blank" class="underline" href="https://paypal.me/ambrebertucci">Buy me a coffee</a></p>
         </UContainer>
     </footer>
     </div>
