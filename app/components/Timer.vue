@@ -18,7 +18,7 @@
 
       <template #content>
         <div class="flex mb-4 flex-col md:flex-row">
-          <div v-if="permissions === 'edit'" class="flex flex-row justify-center md:flex-col">
+          <div v-if="permissions === 'edit'" class="flex flex-row justify-center md:justify-start md:flex-col">
             <UButton loading-auto v-if="!timer.is_paused" icon="i-lucide-circle-pause" size="xl" variant="ghost" color="neutral" @click="pause_timer">Pause</UButton>
             <UButton loading-auto v-if="timer.is_paused" icon="i-lucide-circle-play" size="xl" variant="ghost" color="neutral" @click="start_timer">Start</UButton>
             <UButton loading-auto v-if="timer.is_paused" icon="i-lucide-timer-reset" size="xl" variant="ghost" color="neutral" @click="reset_timer">Reset</UButton>
@@ -27,7 +27,7 @@
 
           <TimeDisplay :time="remainingTime" :paused="timer.is_paused" />
 
-          <div v-if="permissions === 'edit'" class="flex flex-row justify-center md:flex-col">
+          <div v-if="permissions === 'edit'" class="flex flex-row justify-center md:justify-start md:flex-col">
             <UButton size="xl" variant="ghost" color="neutral" @click="async () => add_time(30)">+ 30''</UButton>
             <UButton size="xl" variant="ghost" color="neutral" @click="async () => add_time(60)">+ 1'</UButton>
             <UButton size="xl" variant="ghost" color="neutral" @click="async () => add_time(300)">+ 5'</UButton>
