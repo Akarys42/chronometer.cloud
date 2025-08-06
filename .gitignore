@@ -1,5 +1,6 @@
 .wrangler
 .yarn
+.yarnrc.yml
 
 ## Nuxt
 node_modules
