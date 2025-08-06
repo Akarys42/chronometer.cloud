@@ -2,10 +2,11 @@
   <UApp>
     <div class="flex flex-col min-h-screen">
       <header class="border-b border-gray-200 dark:border-gray-800 bg-black/15">
-        <UContainer class="flex items-center justify-center md:justify-start py-4">
+        <UContainer class="relative flex items-center justify-center md:justify-start py-4">
           <NuxtLink to="/">
             <Logo class="h-15" />
           </NuxtLink>
+          <UButton class="absolute right-5 top-5 invisible md:visible" :icon="isDark ? 'i-lucide-moon' : 'i-lucide-sun'" size="xl" variant="outline" color="neutral" @click="isDark = !isDark"/>
         </UContainer>
       </header>
 
@@ -27,4 +28,15 @@
 
 <script setup lang="ts">
 import { Logo } from '#components';
+
+const colorMode = useColorMode()
+
+const isDark = computed({
+  get() {
+    return colorMode.value === 'dark'
+  },
+  set(_isDark) {
+    colorMode.preference = _isDark ? 'dark' : 'light'
+  }
+})
 </script>
