@@ -1,13 +1,13 @@
 <template>
   <div
-      class="font-mono text-9xl flex grow items-end justify-self-center justify-center gap-1 transition-colors duration-300"
+      class="font-mono text-6xl md:text-9xl flex grow items-end justify-self-center justify-center gap-1 transition-colors duration-300"
       :class="{
       'text-red-600': isOvertime,
       'animate-blink': paused
     }"
   >
     <span>{{ sign }}{{ hours }}:{{ minutes }}:{{ seconds }}</span>
-    <span class="text-6xl opacity-70">.{{ fractional }}</span>
+    <span class="text-3xl md:text-6xl opacity-70">.{{ fractional }}</span>
   </div>
 </template>
 

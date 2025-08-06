@@ -17,16 +17,17 @@
       />
 
       <template #content>
-        <div class="flex mb-4">
-          <div v-if="permissions === 'edit'" class="flex flex-col">
+        <div class="flex mb-4 flex-col md:flex-row">
+          <div v-if="permissions === 'edit'" class="flex flex-row justify-center md:flex-col">
             <UButton loading-auto v-if="!timer.is_paused" icon="i-lucide-circle-pause" size="xl" variant="ghost" color="neutral" @click="pause_timer">Pause</UButton>
             <UButton loading-auto v-if="timer.is_paused" icon="i-lucide-circle-play" size="xl" variant="ghost" color="neutral" @click="start_timer">Start</UButton>
             <UButton loading-auto v-if="timer.is_paused" icon="i-lucide-timer-reset" size="xl" variant="ghost" color="neutral" @click="reset_timer">Reset</UButton>
+            <UButton loading-auto icon="i-lucide-menu" size="xl" variant="ghost" color="neutral" @click="() => { are_extra_actions_opened = true }">More</UButton>
           </div>
 
           <TimeDisplay :time="remainingTime" :paused="timer.is_paused" />
 
-          <div v-if="permissions === 'edit'" class="flex flex-col">
+          <div v-if="permissions === 'edit'" class="flex flex-row justify-center md:flex-col">
             <UButton size="xl" variant="ghost" color="neutral" @click="async () => add_time(30)">+ 30''</UButton>
             <UButton size="xl" variant="ghost" color="neutral" @click="async () => add_time(60)">+ 1'</UButton>
             <UButton size="xl" variant="ghost" color="neutral" @click="async () => add_time(300)">+ 5'</UButton>
@@ -49,6 +50,21 @@
       </div>
     </template>
   </USlideover>
+
+  <USlideover v-model:open="are_extra_actions_opened" title="Other Actions">
+    <template #body>
+      <div class="flex flex-col">
+        <UButton loading-auto icon="i-lucide-edit" size="xl" variant="ghost" color="neutral" @click="() => {
+          is_renaming = true;
+          are_extra_actions_opened = false;
+        }">Rename</UButton>
+        <UButton loading-auto icon="i-lucide-trash-2" size="xl" variant="ghost" color="error" @click="async () => {
+          await delete_timer();
+          are_extra_actions_opened = false;
+        }">Delete</UButton>
+      </div>
+    </template>
+  </USlideover>
 </template>
 
 <script setup lang="ts">
@@ -65,6 +81,24 @@ type TimerType = {
 
 const context_menu_items = ref<ContextMenuItem[]>([
   {
+    label: "Start / Pause",
+    icon: 'i-lucide-circle-play',
+    async onSelect() {
+      if (props.timer.is_paused) {
+        await start_timer();
+      } else {
+        await pause_timer();
+      }
+    }
+  },
+  {
+    label: 'Reset',
+    icon: 'i-lucide-timer-reset',
+    async onSelect() {
+      await reset_timer();
+    }
+  },
+  {
     label: 'Rename',
     icon: 'i-lucide-edit',
     onSelect() {
@@ -72,29 +106,11 @@ const context_menu_items = ref<ContextMenuItem[]>([
     },
   },
   {
-    label: "Start / Pause",
-    icon: 'i-lucide-circle-play',
-    onSelect() {
-      if (props.timer.is_paused) {
-        start_timer();
-      } else {
-        pause_timer();
-      }
-    }
-  },
-  {
-    label: 'Reset',
-    icon: 'i-lucide-timer-reset',
-    onSelect() {
-      reset_timer();
-    }
-  },
-  {
     label: 'Delete',
     icon: 'i-lucide-trash-2',
     color: 'error',
     async onSelect() {
-      await perform_action("", "Something went wrong while trying to delete the timer.", "DELETE");
+      await delete_timer()
     }
   }
 ])
@@ -108,6 +124,7 @@ const props = defineProps<{
 const toast = useToast();
 const backendUrl = useRuntimeConfig().public.backendUrl;
 const is_renaming = ref(false);
+const are_extra_actions_opened = ref(false);
 const new_name = ref(props.timer.name);
 
 async function perform_action(action: string, error: string, method: "POST" | "DELETE" = "POST") {
@@ -144,6 +161,10 @@ async function add_time(seconds: number) {
 async function rename_timer() {
   await perform_action("rename?name=" + encodeURIComponent(new_name.value), "Something went wrong while trying to rename the timer.");
   is_renaming.value = false;
+}
+
+async function delete_timer() {
+  await perform_action("", "Something went wrong while trying to delete the timer.", "DELETE");
 }
 
 const remainingTime = ref(props.timer.remaining_duration)
