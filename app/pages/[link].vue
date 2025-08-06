@@ -9,7 +9,7 @@
           <UIcon v-if="connection_status === 'disconnected' || connection_status === 'lost'" name="i-lucide-wifi-off" class="size-8 animate-pulsate" :class="connection_status === 'disconnected' ? 'text-warning' : 'text-error'" />
         </UTooltip>
       </div>
-      <p v-if="page.timers.length === 0" class="mt-5 text-xl font-bold leading-none tracking-tight text-gray-800 dark:text-gray-300">No timers currently created.</p>
+      <p v-if="page.timers.length === 0" class="mt-3 text-xl font-bold leading-none tracking-tight text-gray-800 dark:text-gray-300">No timers currently created.</p>
     </div>
     <div v-for="(timer, timer_number) in page.timers">
       <Timer :timer="timer" :permissions="permissions" :link="route.params.link as string" :timer_number="timer_number" />
@@ -17,7 +17,7 @@
     <USeparator v-if="permissions === 'edit'" class="m-2" />
 
     <div v-if="permissions === 'edit'" class="flex flex-col items-center justify-center gap-2 m-5">
-      <h1 class="mb-4 text-2xl md:text-3xl font-bold leading-none tracking-tight text-gray-900 dark:text-white">Create a new timer</h1>
+      <h1 class="mb-4 text-2xl md:text-3xl font-bold leading-none tracking-tight text-gray-900 dark:text-white">Create a new chronometer</h1>
       <DurationInput v-model="new_timer_duration"/>
       <UButton loading-auto class="m-2" size="xl" icon="i-lucide-alarm-clock-plus" :disabled="new_timer_duration === 0" @click="create_timer">Add</UButton>
     </div>
@@ -53,7 +53,7 @@
 </template>
 
 <script setup lang="ts">
-import { DurationInput, TailwindColorPicker, CopyButton} from "#components";
+import { DurationInput, TailwindColorPicker } from "#components";
 import LinkElement from "~/components/LinkElement.vue";
 
 const backendUrl = useRuntimeConfig().public.backendUrl;
@@ -116,7 +116,7 @@ async function create_timer() {
     if (!r.ok) {
       toast.add({
         title: "Uh oh!",
-        description: "Something went wrong while trying to create the timer.",
+        description: "Something went wrong while trying to create the chronometer.",
         color: "error",
         icon: "i-lucide-alert-triangle",
       });
@@ -125,7 +125,7 @@ async function create_timer() {
 
     toast.add({
       title: "Success!",
-      description: "Timer created successfully.",
+      description: "Chronometer created successfully.",
       color: "success",
       icon: "i-lucide-check-circle",
     });
@@ -172,7 +172,7 @@ function connect_websocket() {
     connection_status.value = "connected";
     toast.add({
       title: "Connected",
-      description: "Successfully connected to the server. Timers will update in real-time.",
+      description: "Successfully connected to the server. Chronometers will update in real-time.",
       color: "success",
       icon: "i-lucide-wifi",
     });

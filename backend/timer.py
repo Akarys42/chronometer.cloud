@@ -14,7 +14,7 @@ class TimerPage:
         self.public_link = random_string(8)
         self.edit_link = random_string(8)
         self.websocket_manager = websocket_manager
-        self.name = "Cloud-synchronized timers"
+        self.name = "Cloud-synchronized chronometers"
         self.color = "indigo"
 
     async def create_timer(self, duration: float) -> None:
@@ -58,7 +58,7 @@ class Timer:
 
         self.websocket_manager = websocket_manager
         self.page = page
-        self.name = "Timer"
+        self.name = "Chronometer"
         self.full_duration = duration
 
     async def start(self) -> None:

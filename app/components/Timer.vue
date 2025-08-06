@@ -39,11 +39,11 @@
     </UCollapsible>
   </UContextMenu>
 
-  <USlideover v-model:open="is_renaming" title="Renaming Timer">
+  <USlideover v-model:open="is_renaming" title="Renaming Chronometer">
     <template #body>
       <div class="space-y-4">
         <UFormField label="New name" size="xl" required>
-          <UInput v-model="new_name" placeholder="Enter the name of the timer" icon="i-lucide-text-cursor-input" />
+          <UInput v-model="new_name" placeholder="Enter the name of the chronometer" icon="i-lucide-text-cursor-input" />
         </UFormField>
 
         <UButton loading-auto icon="i-lucide-save" size="xl" :disabled="new_name.length === 0" @click="rename_timer">Rename</UButton>
@@ -143,28 +143,28 @@ async function perform_action(action: string, error: string, method: "POST" | "D
 }
 
 async function start_timer() {
-  await perform_action("start","Something went wrong while trying to start the timer.")
+  await perform_action("start","Something went wrong while trying to start the chronometer.")
 }
 
 async function pause_timer() {
-  await perform_action("pause","Something went wrong while trying to pause the timer.")
+  await perform_action("pause","Something went wrong while trying to pause the chronometer.")
 }
 
 async function reset_timer() {
-  await perform_action("reset","Something went wrong while trying to reset the timer.")
+  await perform_action("reset","Something went wrong while trying to reset the chronometer.")
 }
 
 async function add_time(seconds: number) {
-  await perform_action("add_time/" + seconds, "Something went wrong while trying to add time to the timer.")
+  await perform_action("add_time/" + seconds, "Something went wrong while trying to add time to the chronometer.")
 }
 
 async function rename_timer() {
-  await perform_action("rename?name=" + encodeURIComponent(new_name.value), "Something went wrong while trying to rename the timer.");
+  await perform_action("rename?name=" + encodeURIComponent(new_name.value), "Something went wrong while trying to rename the chronometer.");
   is_renaming.value = false;
 }
 
 async function delete_timer() {
-  await perform_action("", "Something went wrong while trying to delete the timer.", "DELETE");
+  await perform_action("", "Something went wrong while trying to delete the chronometer.", "DELETE");
 }
 
 const remainingTime = ref(props.timer.remaining_duration)
