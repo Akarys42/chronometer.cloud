@@ -4,6 +4,7 @@ from typing import NoReturn
 from fastapi import FastAPI, HTTPException, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
+from websockets import ConnectionClosed
 
 from backend.timer import Timer, TimerPage
 from backend.websocket_manager import WebsocketManager
@@ -158,7 +159,7 @@ async def websocket_subscribe(*, websocket: WebSocket, link: str) -> NoReturn:
         while True:
             await asyncio.sleep(10)
             await websocket.send_json(page.to_json())
-    except WebSocketDisconnect:
+    except (WebSocketDisconnect, ConnectionClosed):
         websocket_manager.disconnect(websocket, page.public_link)
     except Exception as e:
         websocket_manager.disconnect(websocket, page.public_link)

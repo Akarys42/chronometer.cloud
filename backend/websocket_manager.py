@@ -1,3 +1,5 @@
+from contextlib import suppress
+
 from fastapi import WebSocket, WebSocketException
 from websockets.exceptions import ConnectionClosed
 
@@ -10,15 +12,16 @@ class WebsocketManager:
 
     async def connect(self, websocket: WebSocket, public_link: str) -> None:
         """Add a new websocket connection."""
-        await websocket.accept()
         self.connections.setdefault(public_link, []).append(websocket)
+        await websocket.accept()
 
     def disconnect(self, websocket: WebSocket, public_link: str) -> None:
         """Remove a websocket connection."""
         if public_link in self.connections:
-            self.connections[public_link].remove(websocket)
-            if not self.connections[public_link]:
-                del self.connections[public_link]
+            with suppress(ValueError):
+                self.connections[public_link].remove(websocket)
+                if not self.connections[public_link]:
+                    del self.connections[public_link]
 
     async def broadcast_update(self, public_link: str, data: dict) -> None:
         """Broadcast an update to all connected websockets for a specific public link."""
