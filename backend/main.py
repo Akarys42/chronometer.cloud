@@ -148,18 +148,18 @@ async def websocket_subscribe(*, websocket: WebSocket, link: str) -> NoReturn:
         if not edit_page:
             await websocket.close(code=1000)
             return
-        public_link = edit_page.public_link
+        page = edit_page
     else:
-        public_link = link
+        page = public_page
 
-    await websocket_manager.connect(websocket, public_link)
+    await websocket_manager.connect(websocket, page.public_link)
 
     try:
-        # Keep the connection open even if no message is received
         while True:
-            await asyncio.sleep(10)  # Just keep the connection alive
+            await asyncio.sleep(10)
+            await websocket.send_json(page.to_json())
     except WebSocketDisconnect:
-        websocket_manager.disconnect(websocket, public_link)
+        websocket_manager.disconnect(websocket, page.public_link)
     except Exception as e:
-        websocket_manager.disconnect(websocket, public_link)
+        websocket_manager.disconnect(websocket, page.public_link)
         raise e from None

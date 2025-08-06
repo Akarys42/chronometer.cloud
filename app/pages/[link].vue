@@ -1,30 +1,38 @@
 <template>
-    <div v-if="permissions !== 'loading'" class="flex flex-col">
-      <div class="flex flex-col items-center gap-2 m-5">
-        <div class="w-full relative">
-          <h1 class="text-3xl font-bold leading-none tracking-tight text-gray-900 dark:text-white text-center grow">{{ page.name }}</h1>
-          <UButton v-if="permissions === 'edit'" class="absolute right-0 top-0" icon="i-lucide-settings" size="xl" variant="outline" color="neutral" @click="open_settings"/>
-        </div>
-        <p v-if="page.timers.length === 0" class="text-xl font-bold leading-none tracking-tight text-gray-800 dark:text-gray-300">No timers currently created.</p>
+  <div v-if="permissions !== 'loading'" class="flex flex-col">
+    <div class="flex flex-col items-center gap-2 m-5">
+      <div class="w-full relative">
+        <h1 class="text-3xl font-bold leading-none tracking-tight text-gray-900 dark:text-white text-center grow">{{ page.name }}</h1>
+        <UButton v-if="permissions === 'edit'" class="absolute right-0 top-0" icon="i-lucide-settings" size="xl" variant="outline" color="neutral" @click="open_settings"/>
+        <UTooltip :text="connection_status === 'disconnected' ? 'You are currently disconnected from the server. We\'re trying to reconnect you...' : 'You are currently disconnected from the server. Refresh the page to try again.'" :delay-duration="0" class="absolute left-0 top-0">
+          <UIcon v-if="connection_status === 'disconnected' || connection_status === 'lost'" name="i-lucide-wifi-off" class="size-8 animate-pulsate" :class="connection_status === 'disconnected' ? 'text-warning' : 'text-error'" />
+        </UTooltip>
       </div>
-      <div v-for="(timer, timer_number) in page.timers">
-        <Timer :timer="timer" :permissions="permissions" :link="route.params.link as string" :timer_number="timer_number" />
-      </div>
-      <USeparator class="m-2" />
-
-      <div v-if="permissions === 'edit'" class="flex flex-col items-center justify-center gap-2 m-5">
-        <h1 class="mb-4 text-3xl font-bold leading-none tracking-tight text-gray-900 dark:text-white">Create a new timer</h1>
-        <DurationInput v-model="new_timer_duration"/>
-        <UButton loading-auto class="m-2" size="xl" icon="i-lucide-alarm-clock-plus" :disabled="new_timer_duration === 0" @click="create_timer">Add</UButton>
-      </div>
-      <USeparator v-if="permissions === 'edit'" class="m-2" />
-
-      <div class="flex flex-col grow items-center justify-center gap-2 m-5">
-        <h1 class="mb-4 text-3xl font-bold leading-none tracking-tight text-gray-900 dark:text-white">Links</h1>
-        <span>Public link: <ULink :to="'/' + page.public_link">/{{ page.public_link }}</ULink></span>
-        <span v-if="permissions === 'edit'">Private editing link: <ULink :to="'/' + route.params.link">/{{ route.params.link }}</ULink></span>
-      </div>
+      <p v-if="page.timers.length === 0" class="text-xl font-bold leading-none tracking-tight text-gray-800 dark:text-gray-300">No timers currently created.</p>
     </div>
+    <div v-for="(timer, timer_number) in page.timers">
+      <Timer :timer="timer" :permissions="permissions" :link="route.params.link as string" :timer_number="timer_number" />
+    </div>
+    <USeparator class="m-2" />
+
+    <div v-if="permissions === 'edit'" class="flex flex-col items-center justify-center gap-2 m-5">
+      <h1 class="mb-4 text-3xl font-bold leading-none tracking-tight text-gray-900 dark:text-white">Create a new timer</h1>
+      <DurationInput v-model="new_timer_duration"/>
+      <UButton loading-auto class="m-2" size="xl" icon="i-lucide-alarm-clock-plus" :disabled="new_timer_duration === 0" @click="create_timer">Add</UButton>
+    </div>
+    <USeparator v-if="permissions === 'edit'" class="m-2" />
+
+    <div class="flex flex-col grow items-center justify-center gap-2 m-5">
+      <h1 class="mb-4 text-3xl font-bold leading-none tracking-tight text-gray-900 dark:text-white">Links</h1>
+      <span>Public link: <ULink :to="'/' + page.public_link">/{{ page.public_link }}</ULink></span>
+      <span v-if="permissions === 'edit'">Private editing link: <ULink :to="'/' + route.params.link">/{{ route.params.link }}</ULink></span>
+    </div>
+  </div>
+  <div v-else class="">
+    <USkeleton class="m-5 w-full h-20" />
+    <USkeleton class="m-5 w-full h-75" />
+    <USkeleton class="m-5 w-full h-75" />
+  </div>
 
   <USlideover v-model:open="are_settings_open" title="Page settings">
     <template #body>
@@ -56,6 +64,9 @@ const new_timer_duration = ref(300);
 const are_settings_open = ref(false);
 const new_page_name = ref("");
 const new_page_color = ref<string | null>(null);
+const websocket = ref<WebSocket | null>(null);
+const connection_status = ref<"connected" | "disconnected" | "lost">("disconnected");
+let retries = 10;
 
 watch(new_page_color, (newColor) => {
   if (newColor) {
@@ -78,8 +89,6 @@ const page = useState<{ timers: any[], public_link: string, name: string, color:
     color: "indigo"
   }
 });
-let websocket: WebSocket;
-let retries = 10;
 
 function open_settings() {
   are_settings_open.value = true;
@@ -154,7 +163,55 @@ async function save_settings() {
   });
 }
 
-await callOnce(async () => {
+function connect_websocket() {
+  websocket.value = new WebSocket(websocketBackendUrl + "/subscribe/" + route.params.link);
+
+  websocket.value.onopen = () => {
+    retries = 10;
+    connection_status.value = "connected";
+    toast.add({
+      title: "Connected",
+      description: "Successfully connected to the server. Timers will update in real-time.",
+      color: "success",
+      icon: "i-lucide-wifi",
+    });
+  };
+
+  websocket.value.onclose = (e) => {
+    if (e.code === 1000) {
+      // Normal closure
+      return;
+    }
+
+    toast.add({
+      title: "Disconnected",
+      description: "The connection to the server has been lost. Attempting to reconnect...",
+      color: "warning",
+      icon: "i-lucide-wifi-off",
+    });
+    if (retries-- <= 0) {
+      connection_status.value = "lost";
+      toast.add({
+        title: "Reconnection failed",
+        description: "Unable to reconnect to the server after multiple attempts. Please refresh the page to try again.",
+        color: "error",
+        icon: "i-lucide-alert-triangle",
+        duration: -1
+      });
+      return;
+    } else {
+      connection_status.value = "disconnected";
+      setTimeout(() => {
+        connect_websocket();
+      }, 1.1 ** (10 - retries) * 1000); // Exponential backoff
+    }
+  };
+  websocket.value.onmessage = async (event) => {
+    page.value = JSON.parse(event.data);
+  };
+}
+
+onMounted(async () => {
   await fetch(backendUrl + "/page/" + route.params.link, {method: "GET"}).then(async r => {
     if (!r.ok) {
       toast.add({
@@ -172,57 +229,29 @@ await callOnce(async () => {
     new_page_name.value = data.page.name;
     new_page_color.value = data.page.color;
   });
-});
 
-function connect_websocket() {
-  websocket = new WebSocket(websocketBackendUrl + "/subscribe/" + route.params.link);
-
-  websocket.onopen = () => {
-    retries = 10;
-    console.log("WebSocket connection established");
-    toast.add({
-      title: "Connected",
-      description: "Successfully connected to the server. Timers will update in real-time.",
-      color: "success",
-      icon: "i-lucide-wifi",
-    });
-  };
-
-  websocket.onclose = (e) => {
-    console.log("WebSocket connection closed", e);
-    toast.add({
-      title: "Disconnected",
-      description: "The connection to the server has been lost. Attempting to reconnect...",
-      color: "warning",
-      icon: "i-lucide-wifi-off",
-    });
-    if (retries-- <= 0) {
-      toast.add({
-        title: "Reconnection failed",
-        description: "Unable to reconnect to the server after multiple attempts. Please refresh the page to try again.",
-        color: "error",
-        icon: "i-lucide-alert-triangle",
-        duration: -1
-      });
-      return;
-    } else {
-      setTimeout(() => {
-        connect_websocket();
-      }, 2 ** (10 - retries) * 500); // Exponential backoff
-    }
-  };
-  websocket.onmessage = async (event) => {
-    page.value = JSON.parse(event.data);
-  };
-}
-
-onMounted(() => {
   connect_websocket();
 })
 
 onBeforeUnmount(() => {
-  if (websocket) {
-    websocket.close();
+  if (websocket.value) {
+    websocket.value.close(1000);
   }
 });
 </script>
+<style scoped>
+@keyframes pulsate {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 0.8;
+  }
+  50% {
+    transform: scale(1.2);
+    opacity: 1;
+  }
+}
+
+.animate-pulsate {
+  animation: pulsate 2s infinite;
+}
+</style>
