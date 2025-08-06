@@ -8,10 +8,10 @@ const props = defineProps({
     required: true,
   },
 })
+const toast = useToast();
 
 function do_copy() {
   navigator.clipboard.writeText(props.text).then(() => {
-    const toast = useToast();
     toast.add({
       title: "Copied!",
       description: "The text has been copied to your clipboard.",
@@ -19,7 +19,6 @@ function do_copy() {
       icon: "i-lucide-copy-check",
     });
   }).catch(() => {
-    const toast = useToast();
     toast.add({
       title: "Error",
       description: "Failed to copy the text.",

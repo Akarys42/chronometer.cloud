@@ -25,8 +25,8 @@
 
     <div v-if="permissions === 'edit'" class="flex flex-col grow items-center justify-center gap-2 m-5">
       <h1 class="mb-4 text-2xl md:text-3xl font-bold leading-none tracking-tight text-gray-900 dark:text-white">Links</h1>
-      <LinkElement text="Public viewing link:" :fragment="page.public_link"/>
       <LinkElement text="Private editing link:" :fragment="route.params.link as string"/>
+      <LinkElement text="Public viewing link:" :fragment="page.public_link"/>
     </div>
   </div>
   <div v-else class="">
