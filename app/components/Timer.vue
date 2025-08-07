@@ -128,7 +128,9 @@ const are_extra_actions_opened = ref(false);
 const new_name = ref(props.timer.name);
 
 async function perform_action(action: string, error: string, method: "POST" | "DELETE" = "POST") {
-  await check_status(fetch(`${backendUrl}/timer/${props.link}/${props.timer_number}/${action}`, {
+  const end = action.length > 0 ? `/${action}` : "";
+
+  await check_status(fetch(`${backendUrl}/timer/${props.link}/${props.timer_number}${end}`, {
     method,
   }), error);
 }
