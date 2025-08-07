@@ -8,8 +8,8 @@ export default defineNuxtConfig({
     css: ['~/assets/css/main.css'],
     runtimeConfig: {
         public: {
-            backendUrl: process.env.NODE_ENV === 'production' ? 'https://chronometer.cloud' : 'http://localhost:8000',
-            websocketBackendUrl: process.env.NODE_ENV === 'wss://chronometer.cloud' ? 'TBD' : 'ws://localhost:8000',
+            backendUrl: process.env.NODE_ENV === 'production' ? 'https://api.chronometer.cloud' : 'http://localhost:8000',
+            websocketBackendUrl: process.env.NODE_ENV === 'wss://api.chronometer.cloud' ? 'TBD' : 'ws://localhost:8000',
         }
     },
     nitro: {
