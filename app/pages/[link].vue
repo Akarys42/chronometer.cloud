@@ -55,6 +55,7 @@
 <script setup lang="ts">
 import { DurationInput, TailwindColorPicker } from "#components";
 import LinkElement from "~/components/LinkElement.vue";
+import { check_status } from "~/utils";
 
 const backendUrl = useRuntimeConfig().public.backendUrl;
 const websocketBackendUrl = useRuntimeConfig().public.websocketBackendUrl;
@@ -106,23 +107,16 @@ async function create_timer() {
     return;
   }
 
-  await fetch(backendUrl + "/page/" + route.params.link + "/timers", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify({ duration: new_timer_duration.value })
-  }).then(async r => {
-    if (!r.ok) {
-      toast.add({
-        title: "Uh oh!",
-        description: "Something went wrong while trying to create the chronometer.",
-        color: "error",
-        icon: "i-lucide-alert-triangle",
-      });
-      return;
-    }
-
+  await check_status(
+      fetch(backendUrl + "/page/" + route.params.link + "/timers", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({ duration: new_timer_duration.value })
+      }),
+      "Something went wrong while trying to create the chronometer."
+  ).then(async r => {
     toast.add({
       title: "Success!",
       description: "Chronometer created successfully.",
@@ -133,26 +127,19 @@ async function create_timer() {
 }
 
 async function save_settings() {
-  await fetch(backendUrl + "/page/" + route.params.link + "/settings", {
-    method: "PUT",
-    headers: {
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify({
-      name: new_page_name.value,
-      color: new_page_color.value
-    })
-  }).then(async r => {
-    if (!r.ok) {
-      toast.add({
-        title: "Uh oh!",
-        description: "Something went wrong while saving the page settings.",
-        color: "error",
-        icon: "i-lucide-alert-triangle",
-      });
-      return;
-    }
-
+  await check_status(
+      fetch(backendUrl + "/page/" + route.params.link + "/settings", {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            name: new_page_name.value,
+            color: new_page_color.value
+          })
+      }),
+          "Something went wrong while saving the page settings."
+  ).then(async r => {
     toast.add({
       title: "Success!",
       description: "Page settings saved successfully.",
@@ -213,17 +200,7 @@ function connect_websocket() {
 }
 
 onMounted(async () => {
-  await fetch(backendUrl + "/page/" + route.params.link, {method: "GET"}).then(async r => {
-    if (!r.ok) {
-      toast.add({
-        title: "Uh oh!",
-        description: "Something went wrong while looking up the page.",
-        color: "error",
-        icon: "i-lucide-alert-triangle",
-      })
-      return
-    }
-
+  await check_status(fetch(backendUrl + "/page/" + route.params.link, {method: "GET"}), "Something went wrong while looking up the page.").then(async r => {
     const data = await r.json();
     permissions.value = data.permissions;
     page.value = data.page;

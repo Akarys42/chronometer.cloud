@@ -70,6 +70,7 @@
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted, computed } from 'vue'
 import type { ContextMenuItem } from '@nuxt/ui'
+import {check_status} from "~/utils";
 
 type TimerType = {
   unpaused_time: null | number,
@@ -121,25 +122,15 @@ const props = defineProps<{
   link: string,
   timer_number: number
 }>();
-const toast = useToast();
 const backendUrl = useRuntimeConfig().public.backendUrl;
 const is_renaming = ref(false);
 const are_extra_actions_opened = ref(false);
 const new_name = ref(props.timer.name);
 
 async function perform_action(action: string, error: string, method: "POST" | "DELETE" = "POST") {
-  await fetch(`${backendUrl}/timer/${props.link}/${props.timer_number}/${action}`, {
+  await check_status(fetch(`${backendUrl}/timer/${props.link}/${props.timer_number}/${action}`, {
     method,
-  }).then(async (response) => {
-    if (!response.ok) {
-      toast.add({
-        title: "Uh oh!",
-        description: error,
-        color: "error",
-        icon: "i-lucide-alert-triangle",
-      })
-    }
-  });
+  }), error);
 }
 
 async function start_timer() {

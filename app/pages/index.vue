@@ -34,21 +34,13 @@
 </template>
 
 <script setup lang="ts">
+import {check_status} from "~/utils";
+
 const backendUrl = useRuntimeConfig().public.backendUrl;
 const toast = useToast();
 
 async function create_page() {
-  await fetch(backendUrl + "/page/new", { method: "POST" }).then(async r => {
-    if (!r.ok) {
-      toast.add({
-        title: "Uh oh!",
-        description: "Something went wrong while trying to create a page.",
-        color: "error",
-        icon: "i-lucide-alert-triangle",
-      });
-      return;
-    }
-
+  await check_status(fetch(backendUrl + "/page/new", { method: "POST" }), "Something went wrong while trying to create a page.").then(async r => {
     toast.add({
       title: "Success!",
       description: "Page created successfully.",
