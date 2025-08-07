@@ -2,9 +2,9 @@
   <div v-if="permissions !== 'loading'" class="flex flex-col">
     <div class="flex flex-col items-center gap-2 m-5">
       <div class="w-full flex flex-col items-center md:relative">
-        <h1 class="text-2xl md:text-3xl font-bold leading-none tracking-tight text-gray-900 dark:text-white text-center grow">{{ page.name }}</h1>
+        <h1 class="text-4xl mb-2 md:mb-5 md:text-5xl font-bold leading-none tracking-tight text-gray-900 dark:text-white text-center grow">{{ page.name }}</h1>
         <UButton v-if="permissions === 'edit'" class="absolute right-0 top-0 invisible md:visible" icon="i-lucide-settings" size="xl" variant="outline" color="neutral" @click="open_settings"/>
-        <UButton v-if="permissions === 'edit'" class="mt-3 w-fit visible md:invisible" icon="i-lucide-settings" variant="outline" color="neutral" @click="open_settings">Settings</UButton>
+        <UButton v-if="permissions === 'edit'" class="mt-3 w-fit visible md:invisible md:absolute" icon="i-lucide-settings" variant="outline" color="neutral" @click="open_settings">Settings</UButton>
         <UTooltip :text="connection_status === 'disconnected' ? 'You are currently disconnected from the server. We\'re trying to reconnect you...' : 'You are currently disconnected from the server. Refresh the page to try again.'" :delay-duration="0" class="absolute left-0 top-0">
           <UIcon v-if="connection_status === 'disconnected' || connection_status === 'lost'" name="i-lucide-wifi-off" class="size-8 animate-pulsate" :class="connection_status === 'disconnected' ? 'text-warning' : 'text-error'" />
         </UTooltip>

@@ -10,10 +10,12 @@
           color="neutral"
           variant="outline"
           trailing-icon="i-lucide-chevron-down"
+          class="text-2xl"
           :ui="{
+            label: 'justify-self-center grow',
           trailingIcon: 'group-data-[state=open]:rotate-180 transition-transform duration-200'
         }"
-          block
+
       />
 
       <template #content>
