@@ -192,12 +192,15 @@ function connect_websocket() {
       return;
     }
 
-    toast.add({
-      title: "Disconnected",
-      description: "The connection to the server has been lost. Attempting to reconnect...",
-      color: "warning",
-      icon: "i-lucide-wifi-off",
-    });
+    if (connection_status.value !== "disconnected") {
+      toast.add({
+        title: "Disconnected",
+        description: "The connection to the server has been lost. Attempting to reconnect...",
+        color: "warning",
+        icon: "i-lucide-wifi-off",
+      });
+    }
+
     if (retries-- <= 0) {
       connection_status.value = "lost";
       toast.add({
