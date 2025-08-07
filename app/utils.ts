@@ -16,9 +16,9 @@ class HttpCodeNotOkError extends Error {
     }
 }
 
-export async function check_status(promise: Promise<Response>, error_message: string): Promise<Response> {
+export async function check_status(promise: Promise<Response>, error_message: string, bypass_404: boolean = false): Promise<Response> {
     return promise.then(r => {
-        if (!r.ok) {
+        if (!r.ok && !(bypass_404 && r.status === 404)) {
             send_error_message(error_message);
             throw new HttpCodeNotOkError(`HTTP error! status: ${r.status}`);
         }

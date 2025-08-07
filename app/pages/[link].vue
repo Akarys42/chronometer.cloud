@@ -29,10 +29,30 @@
       <LinkElement text="Public viewing link:" :fragment="page.public_link"/>
     </div>
   </div>
-  <div v-else class="">
-    <USkeleton class="m-5 w-full h-20" />
-    <USkeleton class="m-5 w-full h-75" />
-    <USkeleton class="m-5 w-full h-75" />
+
+  <div v-else class="h-full">
+    <div v-if="is_not_found" class="h-full flex flex-col items-center justify-center px-6 text-center space-y-10">
+      <p>
+        <span class="text-2xl">This chronometer page doesn't exist</span>
+      </p>
+
+      <ULink to="/">
+        <UButton
+            icon="i-lucide-arrow-left"
+            size="xl"
+            color="primary"
+            variant="solid"
+            loading-auto
+        >
+          Go Back
+        </UButton>
+      </ULink>
+    </div>
+    <div v-else>
+      <USkeleton class="m-5 w-max-full h-20" />
+      <USkeleton class="m-5 w-max-full h-60" />
+      <USkeleton class="m-5 w-max-full h-60" />
+    </div>
   </div>
 
   <USlideover v-model:open="are_settings_open" title="Page settings">
@@ -68,6 +88,7 @@ const new_page_name = ref("");
 const new_page_color = ref<string | null>(null);
 const websocket = ref<WebSocket | null>(null);
 const connection_status = ref<"connected" | "disconnected" | "lost">("disconnected");
+const is_not_found = ref(false);
 let retries = 10;
 
 watch(new_page_color, (newColor) => {
@@ -200,15 +221,21 @@ function connect_websocket() {
 }
 
 onMounted(async () => {
-  await check_status(fetch(backendUrl + "/page/" + route.params.link, {method: "GET"}), "Something went wrong while looking up the page.").then(async r => {
-    const data = await r.json();
-    permissions.value = data.permissions;
-    page.value = data.page;
-    new_page_name.value = data.page.name;
-    new_page_color.value = data.page.color;
+  await check_status(fetch(backendUrl + "/page/" + route.params.link, {method: "GET"}), "Something went wrong while looking up the page.", true).then(async r => {
+    if (r.status === 404) {
+      is_not_found.value = true;
+    } else {
+      const data = await r.json();
+      permissions.value = data.permissions;
+      page.value = data.page;
+      new_page_name.value = data.page.name;
+      new_page_color.value = data.page.color;
+    }
   });
 
-  connect_websocket();
+  if (!is_not_found.value) {
+    connect_websocket();
+  }
 })
 
 onBeforeUnmount(() => {
