@@ -1,10 +1,12 @@
 import asyncio
 import os
 from contextlib import asynccontextmanager
+from datetime import datetime
 from typing import Any, AsyncGenerator, NoReturn
 
 from fastapi import FastAPI, HTTPException, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi_utils.tasks import repeat_every
 from pydantic import BaseModel
 from pymongo import AsyncMongoClient
 from slowapi import Limiter, _rate_limit_exceeded_handler
@@ -13,11 +15,13 @@ from slowapi.util import get_remote_address
 from starlette.requests import Request
 from websockets import ConnectionClosed
 
+from backend.constants import EXPIRATION
 from backend.timer import Timer, TimerPage
+from backend.utils import PrunableDict
 from backend.websocket_manager import WebsocketManager
 
-edit_links: dict[str, TimerPage] = {}
-public_links: dict[str, TimerPage] = {}
+edit_links: PrunableDict[str, TimerPage] = PrunableDict()
+public_links: PrunableDict[str, TimerPage] = PrunableDict()
 websocket_manager = WebsocketManager()
 
 client = AsyncMongoClient(os.environ.get("MONGO_URI"))
@@ -26,7 +30,7 @@ collection = client[os.environ.get("MONGO_DATABASE")].pages
 
 async def create_tld_index() -> None:
     """Create the mongodb index that gives our storage a TTL."""
-    await collection.create_index("last_modified", expireAfterSeconds=7 * 24 * 60 * 60)
+    await collection.create_index("last_modified", expireAfterSeconds=EXPIRATION)
 
 
 async def reload_data() -> None:
@@ -42,6 +46,7 @@ async def reload_data() -> None:
             edit_link=document["edit_link"],
             name=document["name"],
             color=document["color"],
+            last_modified=datetime.fromisoformat(document["last_modified"]),
         )
 
         for timer in document["timers"]:
@@ -68,6 +73,7 @@ async def lifespan(_: FastAPI) -> AsyncGenerator[None, Any]:
     """Run code during the lifespan of our app."""
     await create_tld_index()
     await reload_data()
+    await remove_expired_entries()  # Start the periodic task to prune expired entries
     yield
 
 
@@ -95,6 +101,13 @@ class ModifyPageSettings(BaseModel):
 
     name: str
     color: str
+
+
+@repeat_every(seconds=3600)  # 1 hour
+async def remove_expired_entries() -> None:
+    """Remove expired entries from the edit and public links."""
+    edit_links.prune()
+    public_links.prune()
 
 
 @app.post("/page/new")

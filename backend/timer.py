@@ -5,11 +5,12 @@ from datetime import datetime
 
 from pymongo.asynchronous.collection import AsyncCollection
 
-from backend.utils import random_string
+from backend.constants import EXPIRATION
+from backend.utils import Expirable, random_string
 from backend.websocket_manager import WebsocketManager
 
 
-class TimerPage:
+class TimerPage(Expirable):
     """Represents a page that contains multiple timers and manages their state."""
 
     def __init__(
@@ -22,6 +23,7 @@ class TimerPage:
         edit_link: str = None,
         name: str = "Cloud-synchronized chronometers",
         color: str = "indigo",
+        last_modified: datetime = None,
     ) -> None:
         self.timers = timers or []
         self.public_link = public_link or random_string(8)
@@ -29,6 +31,7 @@ class TimerPage:
 
         self.name = name
         self.color = color
+        self.last_modified = last_modified or datetime.now()
 
         self.websocket_manager = websocket_manager
         self.db_collection = db_collection
@@ -49,11 +52,12 @@ class TimerPage:
 
     async def save(self) -> None:
         """Commit the page to the DB and broadcast updates."""
+        self.last_modified = datetime.now()
         data = self.to_json()
         await self.broadcast_update(data)
         data["_id"] = self.public_link
         data["edit_link"] = self.edit_link
-        data["last_modified"] = datetime.now().isoformat()
+        data["last_modified"] = self.last_modified.isoformat()
 
         await self.db_collection.replace_one({"_id": self.public_link}, data, upsert=True)
 
@@ -69,6 +73,10 @@ class TimerPage:
             "name": self.name,
             "color": self.color,
         }
+
+    def is_expired(self) -> bool:
+        """Check if the page is expired based on its last modified time."""
+        return (datetime.now() - self.last_modified).total_seconds() > EXPIRATION
 
 
 class Timer:
