@@ -7,6 +7,10 @@ from fastapi import FastAPI, HTTPException, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from pymongo import AsyncMongoClient
+from slowapi import Limiter, _rate_limit_exceeded_handler
+from slowapi.errors import RateLimitExceeded
+from slowapi.util import get_remote_address
+from starlette.requests import Request
 from websockets import ConnectionClosed
 
 from backend.timer import Timer, TimerPage
@@ -67,6 +71,7 @@ async def lifespan(_: FastAPI) -> AsyncGenerator[None, Any]:
     yield
 
 
+limiter = Limiter(key_func=get_remote_address)
 app = FastAPI(lifespan=lifespan)
 app.add_middleware(
     CORSMiddleware,
@@ -75,6 +80,8 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+app.state.limiter = limiter
+app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
 
 class NewTimer(BaseModel):
@@ -91,7 +98,8 @@ class ModifyPageSettings(BaseModel):
 
 
 @app.post("/page/new")
-async def new_page() -> dict:
+@limiter.limit("5/minute")
+async def new_page(request: Request) -> dict:
     """Create a new page."""
     page = TimerPage(websocket_manager, collection)
     await page.save()
@@ -103,7 +111,8 @@ async def new_page() -> dict:
 
 
 @app.get("/page/{link}")
-async def get_page(link: str) -> dict:
+@limiter.limit("10/minute")
+async def get_page(link: str, request: Request) -> dict:
     """Get a timer page by its link."""
     public_page = public_links.get(link)
     if public_page:
