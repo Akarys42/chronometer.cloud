@@ -10,18 +10,11 @@ const props = defineProps({
 })
 const toast = useToast();
 
-function do_share() {
+async function do_share() {
   if (navigator.share) {
-    navigator.share({
+    await navigator.share({
       url: props.link,
-    }).catch(() => {
-      toast.add({
-        title: "Error",
-        description: "Failed to share the page.",
-        color: "error",
-        icon: "i-lucide-alert-triangle",
-      });
-    });
+    })
   } else {
     toast.add({
       title: "Share not supported",
