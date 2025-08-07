@@ -12,6 +12,17 @@ export default defineNuxtConfig({
             websocketBackendUrl: process.env.NODE_ENV === 'production' ? 'wss://api.chronometer.cloud' : 'ws://localhost:8000',
         }
     },
+    app: {
+        head: {
+            title: 'Chronometers.cloud | Cloud-synchronized chronometers',
+            htmlAttrs: {
+                lang: 'en',
+            },
+            link: [
+                { rel: 'icon', type: 'image/x-icon', href: '/favicon.ico' },
+            ]
+        }
+    },
     nitro: {
         preset: "cloudflare_module",
         cloudflare: {

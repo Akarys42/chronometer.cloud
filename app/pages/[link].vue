@@ -246,6 +246,16 @@ onBeforeUnmount(() => {
     websocket.value.close(1000);
   }
 });
+
+useHead({
+  title: "Chronometers.cloud | Your Cloud-Synchronized Chronometers",
+});
+useSeoMeta({
+  title: "Chronometers.cloud | Your Cloud-Synchronized Chronometers",
+  description: "Create and share synchronized chronometers for your events. Perfect for in-person or remote coordination.",
+  ogTitle: "Chronometers.cloud | Your Cloud-Synchronized Chronometers",
+  ogDescription: "Create and share synchronized chronometers for your events. Perfect for in-person or remote coordination.",
+});
 </script>
 <style scoped>
 @keyframes pulsate {

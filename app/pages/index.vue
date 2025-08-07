@@ -51,6 +51,13 @@ async function create_page() {
     await navigateTo("/" + data.edit_link);
   });
 }
+
+useSeoMeta({
+  title: "Cloud-Synchronized Chronometers",
+  description: "Create and share synchronized chronometers for your events. Perfect for in-person or remote coordination.",
+  ogTitle: "Cloud-Synchronized Chronometers",
+  ogDescription: "Create and share synchronized chronometers for your events. Perfect for in-person or remote coordination.",
+})
 </script>
 
 <style scoped>
