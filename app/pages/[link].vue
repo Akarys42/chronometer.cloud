@@ -9,7 +9,7 @@
           <UIcon v-if="connection_status === 'disconnected' || connection_status === 'lost'" name="i-lucide-wifi-off" class="size-8 animate-pulsate" :class="connection_status === 'disconnected' ? 'text-warning' : 'text-error'" />
         </UTooltip>
       </div>
-      <p v-if="page.timers.length === 0" class="mt-3 text-xl font-bold leading-none tracking-tight text-gray-800 dark:text-gray-300">No timers currently created.</p>
+      <p v-if="page.timers.length === 0" class="mt-3 text-xl font-bold leading-none tracking-tight text-gray-800 dark:text-gray-300">No chronometer currently created.</p>
     </div>
     <div v-for="(timer, timer_number) in page.timers">
       <Timer :timer="timer" :permissions="permissions" :link="route.params.link as string" :timer_number="timer_number" />
