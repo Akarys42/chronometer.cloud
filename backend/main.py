@@ -235,8 +235,8 @@ async def websocket_subscribe(*, websocket: WebSocket, link: str) -> NoReturn:
 
     try:
         while True:
-            await asyncio.sleep(10)
             await websocket.send_json(page.to_json())
+            await asyncio.sleep(10)
     except (WebSocketDisconnect, ConnectionClosed):
         websocket_manager.disconnect(websocket, page.public_link)
     except Exception as e:
