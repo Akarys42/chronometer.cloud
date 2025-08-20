@@ -30,6 +30,7 @@
 import { Logo } from '#components';
 
 const colorMode = useColorMode()
+const toast = useToast()
 
 const isDark = computed({
   get() {
@@ -38,5 +39,9 @@ const isDark = computed({
   set(_isDark) {
     colorMode.preference = _isDark ? 'dark' : 'light'
   }
+})
+
+window.addEventListener("visibilitychange", () => {
+  toast.clear()
 })
 </script>
