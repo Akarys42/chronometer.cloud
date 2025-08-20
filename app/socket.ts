@@ -26,13 +26,13 @@ export class ChronoSocket {
     }
 
     public connect(): void {
-        const socket = new WebSocket(this.url);
-        socket.onopen = () => {
+        this.socket = new WebSocket(this.url);
+        this.socket.onopen = () => {
             this.attempts = MAX_RETRIES;
             this.callbacks.onConnected(this);
             this.firstConnection = false;
         };
-        socket.onclose = (event) => {
+        this.socket.onclose = (event) => {
             this.socket = null;
 
             if (event.code === 1000) {
@@ -49,7 +49,7 @@ export class ChronoSocket {
                 this.callbacks.onLost(this);
             }
         };
-        socket.onmessage = this.callbacks.onMessage;
+        this.socket.onmessage = this.callbacks.onMessage;
     }
 
     public close(): void {
