@@ -49,9 +49,9 @@
       </ULink>
     </div>
     <div v-else>
-      <USkeleton class="m-5 w-max-full h-20" />
-      <USkeleton class="m-5 w-max-full h-60" />
-      <USkeleton class="m-5 w-max-full h-60" />
+      <USkeleton class="m-5 w-max-full h-20"/>
+      <USkeleton class="m-5 w-max-full h-60"/>
+      <USkeleton class="m-5 w-max-full h-60"/>
     </div>
   </div>
 
@@ -73,9 +73,10 @@
 </template>
 
 <script setup lang="ts">
-import { DurationInput, TailwindColorPicker } from "#components";
+import {DurationInput, TailwindColorPicker} from "#components";
 import LinkElement from "~/components/LinkElement.vue";
-import { check_status } from "~/utils";
+import {check_status} from "~/utils";
+import {ChronoSocket} from "~/socket";
 
 const backendUrl = useRuntimeConfig().public.backendUrl;
 const websocketBackendUrl = useRuntimeConfig().public.websocketBackendUrl;
@@ -86,10 +87,11 @@ const new_timer_duration = ref(300);
 const are_settings_open = ref(false);
 const new_page_name = ref("");
 const new_page_color = ref<string | null>(null);
-const websocket = ref<WebSocket | null>(null);
 const connection_status = ref<"connected" | "disconnected" | "lost">("disconnected");
 const is_not_found = ref(false);
-let retries = 10;
+let websocket: ChronoSocket | null;
+let disconnect_toast_id: string | number | null;
+let lost_toast_id: string | number | null;
 
 watch(new_page_color, (newColor) => {
   if (newColor) {
@@ -106,7 +108,7 @@ watch(are_settings_open, () => {
 const permissions = useState<"loading" | "public" | "edit">("permissions", () => "loading");
 const page = useState<{ timers: any[], public_link: string, name: string, color: string }>("page", () => {
   return {
-    timers : [],
+    timers: [],
     public_link: "loading",
     name: "Loading...",
     color: "indigo"
@@ -130,11 +132,11 @@ async function create_timer() {
 
   await check_status(
       fetch(backendUrl + "/page/" + route.params.link + "/timers", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json"
-          },
-          body: JSON.stringify({ duration: new_timer_duration.value })
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({duration: new_timer_duration.value})
       }),
       "Something went wrong while trying to create the chronometer."
   ).then(async r => {
@@ -150,16 +152,16 @@ async function create_timer() {
 async function save_settings() {
   await check_status(
       fetch(backendUrl + "/page/" + route.params.link + "/settings", {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json"
-          },
-          body: JSON.stringify({
-            name: new_page_name.value,
-            color: new_page_color.value
-          })
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          name: new_page_name.value,
+          color: new_page_color.value
+        })
       }),
-          "Something went wrong while saving the page settings."
+      "Something went wrong while saving the page settings."
   ).then(async r => {
     toast.add({
       title: "Success!",
@@ -173,55 +175,86 @@ async function save_settings() {
 }
 
 function connect_websocket() {
-  websocket.value = new WebSocket(websocketBackendUrl + "/subscribe/" + route.params.link);
+  websocket = new ChronoSocket(
+      websocketBackendUrl + "/subscribe/" + route.params.link,
+      {
+        onConnected(socket: ChronoSocket) {
+          if (disconnect_toast_id) {
+            toast.remove(disconnect_toast_id)
+            disconnect_toast_id = null;
+          }
+          if (lost_toast_id) {
+            toast.remove(lost_toast_id);
+            lost_toast_id = null;
+          }
 
-  websocket.value.onopen = () => {
-    retries = 10;
-    connection_status.value = "connected";
-    toast.add({
-      title: "Connected",
-      description: "Successfully connected to the server. Chronometers will update in real-time.",
-      color: "success",
-      icon: "i-lucide-wifi",
-    });
-  };
+          connection_status.value = "connected";
 
-  websocket.value.onclose = (e) => {
-    if (e.code === 1000) {
-      // Normal closure
-      return;
-    }
+          if (!socket.isFirstConnection) {
+            toast.add({
+              title: "Connected",
+              description: "Successfully connected to the server. Chronometers will update in real-time.",
+              color: "success",
+              icon: "i-lucide-wifi",
+            });
+          }
+        },
+        onMessage(event: MessageEvent) {
+          page.value = JSON.parse(event.data);
+        },
+        onDisconnected(socket: ChronoSocket) {
+          if (connection_status.value !== "disconnected") {
+            disconnect_toast_id = toast.add({
+              title: "Disconnected",
+              description: "The connection to the server has been lost. Attempting to reconnect...",
+              color: "warning",
+              icon: "i-lucide-wifi-off",
+              duration: -1
+            }).id;
+          }
+          if (lost_toast_id) {
+            toast.remove(lost_toast_id);
+            lost_toast_id = null;
+          }
 
-    if (connection_status.value !== "disconnected") {
-      toast.add({
-        title: "Disconnected",
-        description: "The connection to the server has been lost. Attempting to reconnect...",
-        color: "warning",
-        icon: "i-lucide-wifi-off",
-      });
-    }
+          connection_status.value = "disconnected";
+        },
+        onLost(socket: ChronoSocket) {
+          if (disconnect_toast_id) {
+            toast.remove(disconnect_toast_id)
+            disconnect_toast_id = null;
+          }
 
-    if (retries-- <= 0) {
-      connection_status.value = "lost";
-      toast.add({
-        title: "Reconnection failed",
-        description: "Unable to reconnect to the server after multiple attempts. Please refresh the page to try again.",
-        color: "error",
-        icon: "i-lucide-alert-triangle",
-        duration: -1
-      });
-      return;
-    } else {
-      connection_status.value = "disconnected";
-      setTimeout(() => {
-        connect_websocket();
-      }, 1.1 ** (10 - retries) * 1000); // Exponential backoff
-    }
-  };
-  websocket.value.onmessage = async (event) => {
-    page.value = JSON.parse(event.data);
-  };
+          connection_status.value = "lost";
+
+          lost_toast_id = toast.add({
+            title: "Reconnection failed",
+            description: "Unable to reconnect to the server after multiple attempts. Please refresh the page to try again.",
+            color: "error",
+            icon: "i-lucide-alert-triangle",
+            duration: -1,
+            actions: [{
+              icon: 'i-lucide-refresh-cw',
+              label: 'Reconnect',
+              color: 'neutral',
+              variant: 'outline',
+              onClick: (e) => {
+                e?.stopPropagation()
+                socket.connect()
+              }
+            }]
+          }).id;
+        }
+      }
+  );
+  websocket.connect();
 }
+
+window.addEventListener("visibilitychange", () => {
+  if (document.visibilityState === "visible" && connection_status.value === "lost" && websocket) {
+    websocket.connect()
+  }
+});
 
 onMounted(async () => {
   await check_status(fetch(backendUrl + "/page/" + route.params.link, {method: "GET"}), "Something went wrong while looking up the page.", true).then(async r => {
@@ -242,8 +275,8 @@ onMounted(async () => {
 })
 
 onBeforeUnmount(() => {
-  if (websocket.value) {
-    websocket.value.close(1000);
+  if (websocket) {
+    websocket.close();
   }
 });
 
