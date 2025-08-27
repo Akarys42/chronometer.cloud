@@ -19,7 +19,7 @@
       />
 
       <template #content>
-        <div class="flex mb-4 flex-col md:flex-row">
+        <div class="flex mb-4 flex-col md:flex-row relative">
           <div v-if="permissions === 'edit'" class="flex flex-row justify-center md:justify-start md:flex-col">
             <UButton loading-auto v-if="!timer.is_paused" icon="i-lucide-circle-pause" size="xl" variant="ghost" color="neutral" @click="pause_timer">Pause</UButton>
             <UButton loading-auto v-if="timer.is_paused" icon="i-lucide-circle-play" size="xl" variant="ghost" color="neutral" @click="start_timer">Start</UButton>
@@ -28,6 +28,20 @@
           </div>
 
           <TimeDisplay :time="remainingTime" :paused="timer.is_paused && progress > 0" />
+
+          <UButton
+              v-if="permissions === 'public'"
+              icon="i-lucide-maximize-2"
+              size="md"
+              color="neutral"
+              variant="ghost"
+              class="absolute top-2 right-2 z-10 transition-opacity"
+              :class="{
+                'opacity-100 duration-300': showFullscreenButton,
+                'opacity-0 duration-1000': !showFullscreenButton
+              }"
+              @click="toggleFullscreen"
+          />
 
           <div v-if="permissions === 'edit'" class="flex flex-row justify-center md:justify-start md:flex-col">
             <UButton size="xl" variant="ghost" color="neutral" @click="async () => add_time(30)">+ 30''</UButton>
@@ -67,6 +81,32 @@
       </div>
     </template>
   </USlideover>
+
+  <UModal fullscreen v-model:open="isFullscreen">
+    <template #content>
+      <div ref="fullscreen_content" class="w-full h-full flex items-center justify-center flex-col">
+        <UButton
+            v-if="permissions === 'public'"
+            icon="i-lucide-maximize-2"
+            size="md"
+            color="neutral"
+            variant="ghost"
+            class="absolute top-2 right-2 z-10 transition-opacity"
+            :class="{
+                'opacity-100 duration-300': showFullscreenButton,
+                'opacity-0 duration-1000': !showFullscreenButton
+              }"
+            @click="toggleFullscreen"
+        />
+
+        <div>
+          <h1 class="text-7xl font-bold leading-none tracking-tight text-gray-900 dark:text-white text-center grow">{{ timer.name }}</h1>
+          <TimeDisplay :is_big="true" class="max-h-fit" :time="remainingTime" :paused="timer.is_paused && progress > 0" />
+          <UProgress v-model="progress" class="w-inherit" :max="1" :color="progress === 1 ? 'error' : 'primary'" size="lg"/>
+        </div>
+      </div>
+    </template>
+  </UModal>
 </template>
 
 <script setup lang="ts">
@@ -128,6 +168,7 @@ const backendUrl = useRuntimeConfig().public.backendUrl;
 const is_renaming = ref(false);
 const are_extra_actions_opened = ref(false);
 const new_name = ref(props.timer.name);
+const fullscreen_content = useTemplateRef<Element>("fullscreen_content");
 
 async function perform_action(action: string, error: string, method: "POST" | "DELETE" = "POST") {
   const end = action.length > 0 ? `/${action}` : "";
@@ -189,4 +230,50 @@ const progress = computed(() => {
   const full = props.timer.full_duration
   return Math.min(full > 0 ? ((full - remainingTime.value) / full) : 0, 1)
 })
+
+
+
+
+const isFullscreen = ref(false);
+const showFullscreenButton = ref(true);
+let hideTimer: ReturnType<typeof setTimeout> | null = null;
+
+function resetHideTimer() {
+  showFullscreenButton.value = true;
+  if (hideTimer) clearTimeout(hideTimer);
+  hideTimer = setTimeout(() => {
+    showFullscreenButton.value = false;
+  }, 3000);
+}
+
+async function toggleFullscreen() {
+  isFullscreen.value = !isFullscreen.value;
+
+  requestAnimationFrame(async () => {
+    if (isFullscreen.value) {
+      await document.documentElement.requestFullscreen();
+    } else {
+      await document.exitFullscreen();
+    }
+  });
+
+  resetHideTimer();
+}
+
+async function onFullscreenChange() {
+  if (!document.fullscreenElement) {
+    isFullscreen.value = false;
+  }
+}
+
+onMounted(() => {
+  window.addEventListener("mousemove", resetHideTimer);
+  document.addEventListener("fullscreenchange", onFullscreenChange);
+  resetHideTimer();
+});
+onUnmounted(() => {
+  window.removeEventListener("mousemove", resetHideTimer);
+  document.removeEventListener("fullscreenchange", onFullscreenChange);
+  if (hideTimer) clearTimeout(hideTimer);
+});
 </script>

@@ -1,13 +1,21 @@
 <template>
   <div
-      class="font-mono text-6xl md:text-9xl flex grow items-end justify-self-center justify-center gap-1 transition-colors duration-300"
+      class="font-mono flex grow items-end justify-self-center justify-center gap-1 transition-colors duration-300"
       :class="{
       'text-red-600': isOvertime,
-      'animate-blink': paused
+      'animate-blink': paused,
+      'text-6xl md:text-9xl': !is_big,
+      'text-[15rem]': is_big
     }"
   >
     <span>{{ sign }}{{ hours }}:{{ minutes }}:{{ seconds }}</span>
-    <span class="text-3xl md:text-6xl opacity-70">.{{ fractional }}</span>
+    <span
+        class="opacity-70"
+        :class="{
+            'text-3xl md:text-6xl': !is_big,
+            'text-[11rem]': is_big
+        }"
+    >.{{ fractional }}</span>
   </div>
 </template>
 
@@ -16,7 +24,8 @@ import { computed } from 'vue'
 
 const props = defineProps<{
   time: number  // In seconds, can be negative
-  paused?: boolean
+  paused?: boolean,
+  is_big?: boolean,
 }>()
 
 const isOvertime = computed(() => props.time < 0)
