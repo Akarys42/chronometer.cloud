@@ -8,14 +8,14 @@
     "preview": "nuxt preview",
     "postinstall": "nuxt prepare"
   },
-  "devDependencies": {
-  },
   "dependencies": {
-    "@nuxt/ui": "^3.3.0",
-    "nuxt": "^4.0.3",
     "@iconify-json/lucide": "^1.2.60",
+    "@nuxt/ui": "^3.3.0",
     "@tailwindcss/postcss": "^4.1.11",
     "@tailwindcss/vite": "^4.1.11",
+    "nuxt": "^4.0.3",
+    "qrcode-generator": "^2.0.4",
+    "save-file": "^2.3.1",
     "tailwindcss": "^4.1.11",
     "wrangler": "^4.28.0"
   }

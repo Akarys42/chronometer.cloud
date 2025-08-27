@@ -4,10 +4,11 @@
     <ULink active :to="fragment">/{{ fragment }}</ULink>
     <CopyButton :text="full_link"/>
     <ShareButton :link="full_link"/>
+    <QRButton :link="full_link"/>
   </span>
 </template>
 <script setup lang="ts">
-import { CopyButton, ShareButton } from "#components";
+import { CopyButton, ShareButton, QRButton } from "#components";
 
 const props = defineProps<{
   text: string,
