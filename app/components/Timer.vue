@@ -27,7 +27,7 @@
             <UButton loading-auto icon="i-lucide-menu" size="xl" variant="ghost" color="neutral" @click="() => { are_extra_actions_opened = true }">More</UButton>
           </div>
 
-          <TimeDisplay :time="remainingTime" :paused="timer.is_paused" />
+          <TimeDisplay :time="remainingTime" :paused="timer.is_paused && progress > 0" />
 
           <div v-if="permissions === 'edit'" class="flex flex-row justify-center md:justify-start md:flex-col">
             <UButton size="xl" variant="ghost" color="neutral" @click="async () => add_time(30)">+ 30''</UButton>
