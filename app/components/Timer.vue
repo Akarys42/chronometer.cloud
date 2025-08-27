@@ -15,7 +15,11 @@
             label: 'justify-self-center grow',
           trailingIcon: 'group-data-[state=open]:rotate-180 transition-transform duration-200'
         }"
-
+          @dblclick="() => {
+            if (permissions === 'edit') {
+              is_renaming = true;
+            }
+          }"
       />
 
       <template #content>
