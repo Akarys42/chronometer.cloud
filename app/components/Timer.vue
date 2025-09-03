@@ -39,7 +39,7 @@
               size="md"
               color="neutral"
               variant="ghost"
-              class="absolute top-2 right-2 z-10 transition-opacity"
+              class="invisible md:visible absolute top-2 right-2 z-10 transition-opacity"
               :class="{
                 'opacity-100 duration-300': showFullscreenButton,
                 'opacity-0 duration-1000': !showFullscreenButton
