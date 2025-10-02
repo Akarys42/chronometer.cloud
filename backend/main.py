@@ -11,13 +11,12 @@ from pydantic import BaseModel
 from pymongo import AsyncMongoClient
 from slowapi import Limiter, _rate_limit_exceeded_handler
 from slowapi.errors import RateLimitExceeded
-from slowapi.util import get_remote_address
 from starlette.requests import Request
 from websockets import ConnectionClosed
 
 from backend.constants import EXPIRATION
 from backend.timer import Timer, TimerPage
-from backend.utils import PrunableDict
+from backend.utils import PrunableDict, get_remote_address
 from backend.websocket_manager import WebsocketManager
 
 edit_links: PrunableDict[str, TimerPage] = PrunableDict()

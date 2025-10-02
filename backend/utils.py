@@ -2,6 +2,8 @@ import random
 import string
 from typing import Dict, Generic, Iterable, Protocol, TypeVar
 
+from starlette.requests import Request
+
 K = TypeVar("K")
 
 
@@ -66,3 +68,10 @@ def random_string(length: int) -> str:
     """Generate a random string of fixed length."""
     letters = string.ascii_lowercase + string.digits
     return "".join(random.choice(letters) for _ in range(length))
+
+
+def get_remote_address(request: Request) -> str:
+    """Get the remote address from the request, considering Cloudflare."""
+    if "cf-connecting-ip" in request.headers:
+        return request.headers["cf-connecting-ip"]
+    return request.client.host
