@@ -1,8 +1,10 @@
 import asyncio
+import json
 import os
+import time
 from contextlib import asynccontextmanager
 from datetime import datetime
-from typing import Any, AsyncGenerator, NoReturn
+from typing import Any, AsyncGenerator
 
 from fastapi import FastAPI, HTTPException, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
@@ -217,7 +219,7 @@ async def modify_page_settings(edit_link: str, settings: ModifyPageSettings) -> 
 
 
 @app.websocket("/subscribe/{link}")
-async def websocket_subscribe(*, websocket: WebSocket, link: str) -> NoReturn:
+async def websocket_subscribe(*, websocket: WebSocket, link: str) -> None:
     """Subscribe to updates for a specific link."""
     # Try to resolve the public link
     public_page = public_links.get(link)
@@ -241,3 +243,26 @@ async def websocket_subscribe(*, websocket: WebSocket, link: str) -> NoReturn:
     except Exception as e:
         websocket_manager.disconnect(websocket, page.public_link)
         raise e from None
+
+
+@app.websocket("/time")
+async def websocket_time(websocket: WebSocket) -> None:
+    """Websocket endpoint for time synchronization using a protocol similar to NTP."""
+    await websocket.accept()
+    try:
+        while True:
+            # Receive message from client (contains t1)
+            data = await websocket.receive_text()
+            msg = json.loads(data)
+            t1 = msg.get("t1")
+
+            # Server receives at t2
+            t2 = time.time() * 1000  # ms precision
+
+            # Prepare response
+            t3 = time.time() * 1000
+            payload = json.dumps({"t1": t1, "t2": t2, "t3": t3})
+
+            await websocket.send_text(payload)
+    except WebSocketDisconnect:
+        pass

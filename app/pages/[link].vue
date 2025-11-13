@@ -12,7 +12,7 @@
       <p v-if="page.timers.length === 0" class="mt-3 text-xl font-bold leading-none tracking-tight text-gray-800 dark:text-gray-300">No chronometer currently created.</p>
     </div>
     <div v-for="(timer, timer_number) in page.timers">
-      <Timer :timer="timer" :permissions="permissions" :link="route.params.link as string" :timer_number="timer_number" />
+      <Timer :timer="timer" :permissions="permissions" :link="route.params.link as string" :timer_number="timer_number" :real_time_delta="real_time_delta" />
     </div>
     <USeparator v-if="permissions === 'edit'" class="m-2" />
 
@@ -77,6 +77,7 @@ import {DurationInput, TailwindColorPicker} from "#components";
 import LinkElement from "~/components/LinkElement.vue";
 import {check_status} from "~/utils";
 import {ChronoSocket} from "~/socket";
+import {TimeSync} from "~/time_sync";
 
 const backendUrl = useRuntimeConfig().public.backendUrl;
 const websocketBackendUrl = useRuntimeConfig().public.websocketBackendUrl;
@@ -89,6 +90,7 @@ const new_page_name = ref("");
 const new_page_color = ref<string | null>(null);
 const connection_status = ref<"connected" | "disconnected" | "lost">("disconnected");
 const is_not_found = ref(false);
+const real_time_delta = ref(0);
 let websocket: ChronoSocket | null;
 let disconnect_toast_id: string | number | null;
 let lost_toast_id: string | number | null;
@@ -256,6 +258,11 @@ window.addEventListener("visibilitychange", () => {
   }
 });
 
+async function refresh_offset() {
+  const sync = new TimeSync(websocketBackendUrl + "/time");
+  real_time_delta.value = await sync.synchronize();
+}
+
 onMounted(async () => {
   await check_status(fetch(backendUrl + "/page/" + route.params.link, {method: "GET"}), "Something went wrong while looking up the page.", true).then(async r => {
     if (r.status === 404) {
@@ -272,6 +279,8 @@ onMounted(async () => {
   if (!is_not_found.value) {
     connect_websocket();
   }
+
+  await refresh_offset();
 })
 
 onBeforeUnmount(() => {

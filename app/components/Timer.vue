@@ -124,6 +124,7 @@ type TimerType = {
   is_paused: boolean,
   name: string,
   full_duration: number,
+  real_time_delta: number,
 }
 
 const context_menu_items = ref<ContextMenuItem[]>([
@@ -166,7 +167,8 @@ const props = defineProps<{
   timer: TimerType,
   permissions: "public" | "edit",
   link: string,
-  timer_number: number
+  timer_number: number,
+  real_time_delta: number,
 }>();
 const backendUrl = useRuntimeConfig().public.backendUrl;
 const is_renaming = ref(false);
@@ -217,7 +219,7 @@ const updateRemainingTime = () => {
     remainingTime.value = remaining_duration
   } else {
     const elapsed = Date.now() / 1000 - unpaused_time
-    remainingTime.value = remaining_duration - elapsed
+    remainingTime.value = remaining_duration - elapsed - (props.real_time_delta / 1000)
   }
 }
 
@@ -232,11 +234,8 @@ onUnmounted(() => {
 
 const progress = computed(() => {
   const full = props.timer.full_duration
-  return Math.min(full > 0 ? ((full - remainingTime.value) / full) : 0, 1)
+  return Math.max(0, Math.min(full > 0 ? ((full - remainingTime.value) / full) : 0, 1))
 })
-
-
-
 
 const isFullscreen = ref(false);
 const showFullscreenButton = ref(true);
