@@ -1,12 +1,13 @@
 <template>
   <div v-if="(data !== undefined || loading) && !wrong_password">
     <UButton
-      class="mb-3"
-      icon="i-lucide-refresh-ccw"
-      color="neutral"
-      variant="outline"
-      @click="fetch_data"
-    >Refresh</UButton>
+        class="mb-3"
+        icon="i-lucide-refresh-ccw"
+        color="neutral"
+        variant="outline"
+        @click="fetch_data"
+    >Refresh
+    </UButton>
     <UTable
         :data="data"
         :loading="loading"
@@ -22,7 +23,25 @@
     <template #body>
       <div class="flex justify-center">
         <UFieldGroup>
-          <UInput v-model:model-value="password" placeholder="Password" size="xl" />
+          <UInput
+              v-model:model-value="password"
+              placeholder="Password"
+              size="xl"
+              :type="show_password ? 'text' : 'password'"
+          >
+            <template #trailing>
+              <UButton
+                  color="neutral"
+                  variant="link"
+                  size="sm"
+                  :icon="show_password ? 'i-lucide-eye-off' : 'i-lucide-eye'"
+                  :aria-label="show_password ? 'Hide password' : 'Show password'"
+                  :aria-pressed="show_password"
+                  aria-controls="password"
+                  @click="show_password = !show_password"
+              />
+            </template>
+          </UInput>
           <UButton color="primary" size="xl" @click="fetch_data">
             Enter
           </UButton>
@@ -49,6 +68,7 @@ import {unique} from "~/utils";
 const backendUrl = useRuntimeConfig().public.backendUrl;
 
 const password = ref("");
+const show_password = ref(false);
 const data = ref(undefined);
 const loading = ref(false);
 const wrong_password = ref(false);
