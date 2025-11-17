@@ -1,7 +1,7 @@
 <template>
-  <UContextMenu
-      :items="permissions === 'edit' ? context_menu_items : []"
-      class="mb-8"
+  <component
+    :is="permissions === 'edit' ? UContextMenu : 'div'"
+    v-bind="permissions === 'edit' ? { items: context_menu_items, class: 'mb-8' } : {}"
   >
     <UCollapsible default-open :unmount-on-hide="false" class="flex flex-col gap-2">
       <UButton
@@ -57,7 +57,7 @@
         <UProgress v-model="progress" :max="1" :color="progress === 1 ? 'error' : 'primary'" size="lg"/>
       </template>
     </UCollapsible>
-  </UContextMenu>
+  </component>
 
   <USlideover v-model:open="is_renaming" title="Renaming Chronometer">
     <template #body>
@@ -117,6 +117,7 @@
 import { ref, onMounted, onUnmounted, computed } from 'vue'
 import type { ContextMenuItem } from '@nuxt/ui'
 import {check_status} from "~/utils";
+import {UContextMenu} from "#components";
 
 type TimerType = {
   unpaused_time: null | number,
