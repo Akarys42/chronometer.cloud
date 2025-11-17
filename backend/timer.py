@@ -24,6 +24,7 @@ class TimerPage(Expirable):
         name: str = "Cloud-synchronized chronometers",
         color: str = "indigo",
         last_modified: datetime = None,
+        origin: str = "unknown://",
     ) -> None:
         self.timers = timers or []
         self.public_link = public_link or random_string(8)
@@ -32,6 +33,7 @@ class TimerPage(Expirable):
         self.name = name
         self.color = color
         self.last_modified = last_modified or datetime.now()
+        self.origin = origin
 
         self.websocket_manager = websocket_manager
         self.db_collection = db_collection
@@ -55,9 +57,8 @@ class TimerPage(Expirable):
         self.last_modified = datetime.now()
         data = self.to_json()
         await self.broadcast_update(data)
+        data = self.to_full_json()
         data["_id"] = self.public_link
-        data["edit_link"] = self.edit_link
-        data["last_modified"] = self.last_modified.isoformat()
 
         await self.db_collection.replace_one({"_id": self.public_link}, data, upsert=True)
 
@@ -73,6 +74,14 @@ class TimerPage(Expirable):
             "name": self.name,
             "color": self.color,
         }
+
+    def to_full_json(self) -> dict:
+        """Convert the timer page to a full JSON serializable dictionary including private data."""
+        data = self.to_json()
+        data["edit_link"] = self.edit_link
+        data["last_modified"] = self.last_modified.isoformat()
+        data["origin"] = self.origin
+        return data
 
     def is_expired(self) -> bool:
         """Check if the page is expired based on its last modified time."""

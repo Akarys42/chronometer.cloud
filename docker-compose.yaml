@@ -13,6 +13,7 @@ services:
       - USE_RELOADER=true
       - MONGO_URI=mongodb://root:password@mongo:27017/
       - MONGO_DATABASE=chronometer-cloud
+      - ADMIN_PASSWORD_HASH=ef260e9aa3c673af240d17a2660480361a8e081d1ffeca2a5ed0e3219fc18567  # dev
 
   frontend:
     build:

@@ -34,14 +34,22 @@
 </template>
 
 <script setup lang="ts">
-import {check_status} from "~/utils";
+import {check_status, get_origin} from "~/utils";
 
 const backendUrl = useRuntimeConfig().public.backendUrl;
 const toast = useToast();
 const i18n = useI18n();
 
 async function create_page() {
-  await check_status(fetch(backendUrl + "/page/new", { method: "POST", headers: {"User-Locale": i18n.locale.value} }), $t("index.toast.create.error")).then(async r => {
+  await check_status(fetch(
+      backendUrl + "/page/new",
+      {
+        method: "POST",
+        headers: {
+          "User-Locale": i18n.locale.value,
+          "Origin": get_origin(),
+        },
+      }), $t("index.toast.create.error")).then(async r => {
     toast.add({
       title: $t("index.toast.create.success.title"),
       description: $t("index.toast.create.success.description"),

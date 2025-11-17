@@ -10,7 +10,7 @@
   },
   "dependencies": {
     "@iconify-json/lucide": "^1.2.60",
-    "@nuxt/ui": "^3.3.0",
+    "@nuxt/ui": "^4.1.0",
     "@nuxtjs/i18n": "^10.2.0",
     "@tailwindcss/postcss": "^4.1.11",
     "@tailwindcss/vite": "^4.1.11",

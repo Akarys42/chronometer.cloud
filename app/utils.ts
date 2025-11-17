@@ -30,3 +30,15 @@ export async function check_status(promise: Promise<Response>, error_message: st
         throw r;
     })
 }
+
+export function get_origin(): string {
+    if (import.meta.server) {
+        return "server://"
+    }
+
+    return window.location.origin;
+}
+
+export function unique<T>(value: T, index: number, array: T[]): boolean {
+    return array.indexOf(value) === index;
+}

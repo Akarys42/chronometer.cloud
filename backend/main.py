@@ -1,9 +1,9 @@
 import asyncio
+import datetime
 import json
 import os
 import time
 from contextlib import asynccontextmanager
-from datetime import datetime
 from typing import Any, AsyncGenerator
 
 from fastapi import FastAPI, HTTPException, WebSocket, WebSocketDisconnect
@@ -17,15 +17,16 @@ from starlette.requests import Request
 from starlette.responses import JSONResponse
 from websockets import ConnectionClosed
 
-from backend.constants import EXPIRATION
+from backend.constants import ADMIN_PASSWORD_HASH, EXPIRATION, FAILED_PASSWORD_BAN
 from backend.lang import DEFAULT_LOCALE, DEFAULT_PAGE_NAME, DEFAULT_TIMER_NAME
 from backend.timer import Timer, TimerPage
-from backend.utils import PrunableDict, get_remote_address
+from backend.utils import PrunableDict, get_remote_address, sha256
 from backend.websocket_manager import WebsocketManager
 
 edit_links: PrunableDict[str, TimerPage] = PrunableDict()
 public_links: PrunableDict[str, TimerPage] = PrunableDict()
 websocket_manager = WebsocketManager()
+last_failed_password_entry: dict[str, datetime.datetime] = {}
 
 client = AsyncMongoClient(os.environ.get("MONGO_URI"))
 collection = client[os.environ.get("MONGO_DATABASE")].pages
@@ -49,7 +50,8 @@ async def reload_data() -> None:
             edit_link=document["edit_link"],
             name=document["name"],
             color=document["color"],
-            last_modified=datetime.fromisoformat(document["last_modified"]),
+            last_modified=datetime.datetime.fromisoformat(document["last_modified"]),
+            origin=document.get("origin", "unknown://"),
         )
 
         for timer in document["timers"]:
@@ -120,8 +122,11 @@ async def remove_expired_entries() -> None:
 async def new_page(request: Request) -> dict:
     """Create a new page."""
     user_locale = request.headers.get("User-Locale", DEFAULT_LOCALE)
+    origin = request.headers.get("Origin", "unknown://")
 
-    page = TimerPage(websocket_manager, collection, name=DEFAULT_PAGE_NAME[user_locale])
+    page = TimerPage(
+        websocket_manager, collection, name=DEFAULT_PAGE_NAME[user_locale], origin=origin
+    )
     await page.save()
 
     edit_links[page.edit_link] = page
@@ -224,6 +229,37 @@ async def modify_page_settings(edit_link: str, settings: ModifyPageSettings) -> 
 
     # Broadcast the updated settings to all connected websockets
     await page.save()
+
+
+@app.get("/admin/index")
+async def admin_index(request: Request) -> list:
+    """Get an index of all pages for admin purposes."""
+    if not ADMIN_PASSWORD_HASH:
+        raise HTTPException(status_code=401, detail="Not configured")
+
+    last_failed = last_failed_password_entry.get(get_remote_address(request))
+    if last_failed and (
+        last_failed + FAILED_PASSWORD_BAN > datetime.datetime.now(datetime.timezone.utc)
+    ):
+        raise HTTPException(status_code=401, detail="Unauthorized")
+
+    authorization = request.headers.get("Authorization")
+
+    if (
+        not authorization.startswith("Plain ")
+        or sha256(authorization.split(" ")[1].strip()) != ADMIN_PASSWORD_HASH
+    ):
+        ip = get_remote_address(request)
+        last_failed_password_entry[ip] = datetime.datetime.now(datetime.timezone.utc)
+
+        raise HTTPException(status_code=401, detail="Unauthorized")
+
+    index = []
+
+    for page in edit_links.values():
+        index.append(page.to_full_json())
+
+    return index
 
 
 @app.websocket("/subscribe/{link}")

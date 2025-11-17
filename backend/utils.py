@@ -1,3 +1,4 @@
+import hashlib
 import random
 import string
 from typing import Dict, Generic, Iterable, Protocol, TypeVar
@@ -53,6 +54,10 @@ class PrunableDict(Generic[K, V]):
         """Return an iterable of key-value pairs."""
         return self._data.items()
 
+    def values(self) -> Iterable[V]:
+        """Return an iterable of values."""
+        return self._data.values()
+
     def prune(self) -> None:
         """Remove items that have expired."""
         working_data = self._data.copy()  # Copy to avoid modifying while iterating
@@ -75,3 +80,8 @@ def get_remote_address(request: Request) -> str:
     if "cf-connecting-ip" in request.headers:
         return request.headers["cf-connecting-ip"]
     return request.client.host
+
+
+def sha256(data: str) -> str:
+    """Return the SHA-256 hash of the given data as a hexadecimal string."""
+    return hashlib.sha256(data.encode("utf8")).hexdigest()
