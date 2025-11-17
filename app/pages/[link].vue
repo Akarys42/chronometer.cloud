@@ -72,6 +72,21 @@
       </div>
     </template>
   </USlideover>
+
+  <template>
+    <UDrawer v-model:open="show_debug">
+      <template #content>
+        <div class="space-y-2 m-2 mb-10">
+          <div>Real time delta: {{ real_time_delta }}ms</div>
+          <div>Permissions: {{ permissions }}</div>
+          <div>Connection status: {{ connection_status }}</div>
+          <div>Locale: {{ i18n.locale.value }}</div>
+          <div>New timer duration: {{ new_timer_duration }}s</div>
+          <div>Endpoints: {{ backendUrl }} | {{ websocketBackendUrl }}</div>
+        </div>
+      </template>
+    </UDrawer>
+  </template>
 </template>
 
 <script setup lang="ts">
@@ -94,6 +109,7 @@ const new_page_color = ref<string | null>(null);
 const connection_status = ref<"connected" | "disconnected" | "lost">("disconnected");
 const is_not_found = ref(false);
 const real_time_delta = ref(0);
+const show_debug = ref(false);
 let websocket: ChronoSocket | null;
 let disconnect_toast_id: string | number | null;
 let lost_toast_id: string | number | null;
@@ -292,6 +308,12 @@ onBeforeUnmount(() => {
     websocket.close();
   }
 });
+
+defineShortcuts({
+  "d-e": () => {
+    show_debug.value = !show_debug.value;
+  }
+})
 
 useHead({
   title: "Chronometers.cloud | Your Cloud-Synchronized Chronometers",
