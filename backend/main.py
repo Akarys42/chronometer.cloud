@@ -14,6 +14,7 @@ from pymongo import AsyncMongoClient
 from slowapi import Limiter, _rate_limit_exceeded_handler
 from slowapi.errors import RateLimitExceeded
 from starlette.requests import Request
+from starlette.responses import JSONResponse
 from websockets import ConnectionClosed
 
 from backend.constants import EXPIRATION
@@ -71,12 +72,14 @@ async def reload_data() -> None:
 
 
 @asynccontextmanager
-async def lifespan(_: FastAPI) -> AsyncGenerator[None, Any]:
+async def lifespan(app: FastAPI) -> AsyncGenerator[None, Any]:
     """Run code during the lifespan of our app."""
     await create_tld_index()
     await reload_data()
     await remove_expired_entries()  # Start the periodic task to prune expired entries
+    app.state.ready = True
     yield
+    app.state.ready = False
 
 
 limiter = Limiter(key_func=get_remote_address)
@@ -271,3 +274,12 @@ async def websocket_time(websocket: WebSocket) -> None:
             await websocket.send_text(payload)
     except WebSocketDisconnect:
         pass
+
+
+@app.get("/ready")
+async def readiness_probe() -> JSONResponse:
+    """Readiness probe endpoint."""
+    if app.state.ready:
+        return JSONResponse(status_code=200, content={"status": "ready"})
+    else:
+        return JSONResponse(status_code=503, content={"status": "not ready"})
