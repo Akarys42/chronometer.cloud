@@ -113,6 +113,7 @@ const show_debug = ref(false);
 let websocket: ChronoSocket | null;
 let disconnect_toast_id: string | number | null;
 let lost_toast_id: string | number | null;
+let refresh_real_time_delta_interval_id: number | null;
 
 watch(new_page_color, (newColor) => {
   if (newColor) {
@@ -301,11 +302,18 @@ onMounted(async () => {
   }
 
   await refresh_offset();
+  refresh_real_time_delta_interval_id = window.setInterval(() => {
+    refresh_offset();
+  }, 60000); // Refresh every 60 seconds
 })
 
 onBeforeUnmount(() => {
   if (websocket) {
     websocket.close();
+  }
+
+  if (refresh_real_time_delta_interval_id) {
+    clearInterval(refresh_real_time_delta_interval_id);
   }
 });
 

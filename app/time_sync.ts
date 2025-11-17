@@ -65,6 +65,7 @@ export class TimeSync {
 			this.isReady = true;
 			const avgOffset = this.getAverageOffset();
 			this.pendingResolve?.(avgOffset);
+			this.ws.close(1000, "Time sync complete");
 		}
 	}
 
