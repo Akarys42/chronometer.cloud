@@ -36,9 +36,9 @@ class TimerPage(Expirable):
         self.websocket_manager = websocket_manager
         self.db_collection = db_collection
 
-    async def create_timer(self, duration: float) -> None:
+    async def create_timer(self, duration: float, name: str = "Chronometer") -> None:
         """Create a new timer with the specified duration."""
-        timer = Timer(duration, self, self.websocket_manager)
+        timer = Timer(duration, self, self.websocket_manager, name=name)
         self.timers.append(timer)
         await self.save()
 

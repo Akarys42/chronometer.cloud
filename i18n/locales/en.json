@@ -1,0 +1,161 @@
+{
+  "general": {
+    "title": "Cloud-Synchronized Chronometers"
+  },
+  "footer": {
+    "author": "Made with <3 by Ambre Bertucci",
+    "call_to_action": {
+      "text": "Enjoying the tool? ",
+      "link": "Buy me a coffee"
+    }
+  },
+  "index": {
+    "features": {
+      "intro": {
+        "text": "Create a {0} for your event. You'll get:",
+        "strong": "shared chronometer page"
+      },
+      "private_link": {
+        "name": "Private link",
+        "text": " to control and manage all chronometers"
+      },
+      "public_link": {
+        "name": "Public link",
+        "text": " to display read-only chronometers on any screen"
+      },
+      "usage": "Perfect for in-person events, or remote coordination",
+      "flexibility": "Each page can contain one or multiple chronometers"
+    },
+    "button_create": "Create Your Chronometer Page",
+    "disclaimer": "No login, payment or ads. Now and forever.",
+    "toast": {
+      "create": {
+        "error": "Something went wrong while trying to create a page.",
+        "success": {
+          "title": "Success!",
+          "description": "Page created successfully."
+        }
+      }
+    }
+  },
+  "page": {
+    "button_settings": "Settings",
+    "status": {
+      "reconnecting": "You are currently disconnected from the server. We're trying to reconnect you...",
+      "disconnected": "You are currently disconnected from the server. Refresh the page to try again."
+    },
+    "no_chronometer": "No chronometer currently created.",
+    "new_chronometer": {
+      "title": "Create a new chronometer",
+      "button_add": "Add"
+    },
+    "links": {
+      "title": "Links",
+      "private": "Private editing link:",
+      "public": "Public viewing link:"
+    },
+    "not_found": {
+      "title": "This chronometer page doesn't exist",
+      "button_back": "Go Back"
+    },
+    "settings": {
+      "title": "Page settings",
+      "name": "Page name",
+      "name_placeholder": "Enter the name of the page",
+      "color": "Page color",
+      "button_save": "Save"
+    },
+    "toast": {
+      "invalid_duration": {
+        "title": "Invalid duration",
+        "description": "Please enter a valid duration greater than 0 seconds."
+      },
+      "create": {
+        "error": "Something went wrong while trying to create the chronometer.",
+        "success": {
+          "title": "Success!",
+          "description": "Chronometer created successfully."
+        }
+      },
+      "save": {
+        "error": "Something went wrong while saving the page settings.",
+        "success": {
+          "title": "Success!",
+          "description": "Page settings saved successfully."
+        }
+      },
+      "connect": {
+        "title": "Connected",
+        "description": "Successfully connected to the server. Chronometers will update in real-time."
+      },
+      "disconnect": {
+        "title": "Disconnected",
+        "description": "The connection to the server has been lost. Attempting to reconnect..."
+      },
+      "lost": {
+        "title": "Reconnection failed",
+        "description": "Unable to reconnect to the server after multiple attempts. Please refresh the page to try again.",
+        "action_reconnect": "Reconnect"
+      },
+      "not_found": {
+        "description": "Something went wrong while looking up the page."
+      }
+    }
+  },
+  "copy": {
+    "toast": {
+      "success": {
+        "title": "Copied!",
+        "description": "The text has been copied to your clipboard."
+      },
+      "error": {
+        "title": "Error",
+        "description": "Failed to copy the text."
+      }
+    }
+  },
+  "duration_input": {
+    "over_limit": "Maximum allowed time is 23:59:59"
+  },
+  "qr": {
+    "button_download": "Download",
+    "button_print": "Print"
+  },
+  "share": {
+    "not_supported": {
+      "title": "Share not supported",
+      "description": "Your browser does not support the Web Share API."
+    }
+  },
+  "timer": {
+    "action": {
+      "pause": "Pause",
+      "start": "Start",
+      "reset": "Reset",
+      "rename": "Rename",
+      "delete": "Delete",
+      "start_pause": "@:timer.action.start / @:timer.action.pause"
+    },
+    "rename": {
+      "title": "Renaming chronometer",
+      "placeholder": "Enter the name of the chronometer",
+      "button_rename": "@:timer.action.rename"
+    },
+    "more": "More",
+    "other_actions": "Other Actions",
+    "error": {
+      "start": "Something went wrong while trying to start the chronometer.",
+      "pause": "Something went wrong while trying to pause the chronometer.",
+      "reset": "Something went wrong while trying to reset the chronometer.",
+      "add": "Something went wrong while trying to add or remove time to the chronometer.",
+      "rename": "Something went wrong while trying to rename the chronometer.",
+      "delete": "Something went wrong while trying to delete the chronometer."
+    },
+    "toast": {
+      "delete": {
+        "title": "Chronometer deleted",
+        "description": "The chronometer has been successfully deleted."
+      }
+    }
+  }
+}

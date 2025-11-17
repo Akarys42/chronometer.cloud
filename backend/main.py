@@ -17,6 +17,7 @@ from starlette.requests import Request
 from websockets import ConnectionClosed
 
 from backend.constants import EXPIRATION
+from backend.lang import DEFAULT_LOCALE, DEFAULT_PAGE_NAME, DEFAULT_TIMER_NAME
 from backend.timer import Timer, TimerPage
 from backend.utils import PrunableDict, get_remote_address
 from backend.websocket_manager import WebsocketManager
@@ -115,7 +116,9 @@ async def remove_expired_entries() -> None:
 @limiter.limit("5/minute")
 async def new_page(request: Request) -> dict:
     """Create a new page."""
-    page = TimerPage(websocket_manager, collection)
+    user_locale = request.headers.get("User-Locale", DEFAULT_LOCALE)
+
+    page = TimerPage(websocket_manager, collection, name=DEFAULT_PAGE_NAME[user_locale])
     await page.save()
 
     edit_links[page.edit_link] = page
@@ -195,13 +198,15 @@ async def rename_timer(edit_link: str, number: int, name: str) -> None:
 
 
 @app.post("/page/{edit_link}/timers", status_code=201)
-async def create_timer(edit_link: str, new_timer: NewTimer) -> None:
+async def create_timer(edit_link: str, new_timer: NewTimer, request: Request) -> None:
     """Create a new timer on the page."""
     page = edit_links.get(edit_link)
     if not page:
         raise HTTPException(status_code=404, detail="Page not found")
 
-    await page.create_timer(new_timer.duration)
+    user_locale = request.headers.get("User-Locale", DEFAULT_LOCALE)
+
+    await page.create_timer(new_timer.duration, name=DEFAULT_TIMER_NAME[user_locale])
 
 
 @app.put("/page/{edit_link}/settings", status_code=204)

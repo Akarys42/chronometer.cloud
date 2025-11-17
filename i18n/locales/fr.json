@@ -1,0 +1,161 @@
+{
+  "general": {
+    "title": "Chronomètres synchronisés dans le cloud"
+  },
+  "footer": {
+    "author": "Fait avec <3 par Ambre Bertucci",
+    "call_to_action": {
+      "text": "Vous aimez l’outil ? ",
+      "link": "Offrez-moi un café"
+    }
+  },
+  "index": {
+    "features": {
+      "intro": {
+        "text": "Créez une {0} pour votre événement. Vous obtenez alors :",
+        "strong": "page de chronomètres partagée"
+      },
+      "private_link": {
+        "name": "Un lien privé",
+        "text": " pour contrôler et gérer tous vos chronomètres"
+      },
+      "public_link": {
+        "name": "Un lien public",
+        "text": " pour afficher les chronomètres en lecture seule sur n’importe quel écran"
+      },
+      "usage": "Parfait pour les événements en présentiel ou la coordination à distance",
+      "flexibility": "Chaque page peut contenir un ou plusieurs chronomètres"
+    },
+    "button_create": "Créer votre page de chronomètres",
+    "disclaimer": "Sans compte, sans paiement, sans publicité. Aujourd’hui et pour toujours.",
+    "toast": {
+      "create": {
+        "error": "Une erreur est survenue lors de la création de la page.",
+        "success": {
+          "title": "Succès !",
+          "description": "La page a été créée avec succès."
+        }
+      }
+    }
+  },
+  "page": {
+    "button_settings": "Paramètres",
+    "status": {
+      "reconnecting": "Vous êtes actuellement déconnecté du serveur. Tentative de reconnexion en cours…",
+      "disconnected": "Vous êtes déconnecté du serveur. Rafraîchissez la page pour réessayer."
+    },
+    "no_chronometer": "Aucun chronomètre pour l’instant.",
+    "new_chronometer": {
+      "title": "Créer un nouveau chronomètre",
+      "button_add": "Créer"
+    },
+    "links": {
+      "title": "Liens",
+      "private": "Lien privé d’édition :",
+      "public": "Lien public de visualisation :"
+    },
+    "not_found": {
+      "title": "Cette page de chronomètres n’existe pas",
+      "button_back": "Retour"
+    },
+    "settings": {
+      "title": "Paramètres de la page",
+      "name": "Nom de la page",
+      "name_placeholder": "Saisissez le nom de la page",
+      "color": "Couleur de la page",
+      "button_save": "Enregistrer"
+    },
+    "toast": {
+      "invalid_duration": {
+        "title": "Durée invalide",
+        "description": "Veuillez entrer une durée supérieure à 0 seconde."
+      },
+      "create": {
+        "error": "Une erreur est survenue lors de la création du chronomètre.",
+        "success": {
+          "title": "Succès !",
+          "description": "Le chronomètre a été créé avec succès."
+        }
+      },
+      "save": {
+        "error": "Une erreur est survenue lors de l’enregistrement des paramètres.",
+        "success": {
+          "title": "Succès !",
+          "description": "Les paramètres ont bien été enregistrés."
+        }
+      },
+      "connect": {
+        "title": "Connecté",
+        "description": "Connexion au serveur établie. Les chronomètres se mettront à jour en temps réel."
+      },
+      "disconnect": {
+        "title": "Déconnecté",
+        "description": "La connexion au serveur a été perdue. Nouvelle tentative…"
+      },
+      "lost": {
+        "title": "Reconnexion impossible",
+        "description": "Impossible de se reconnecter après plusieurs tentatives. Rafraîchissez la page pour réessayer.",
+        "action_reconnect": "Reconnexion"
+      },
+      "not_found": {
+        "description": "Une erreur est survenue lors de la recherche de la page."
+      }
+    }
+  },
+  "copy": {
+    "toast": {
+      "success": {
+        "title": "Copié !",
+        "description": "Le texte a été copié dans votre presse-papiers."
+      },
+      "error": {
+        "title": "Erreur",
+        "description": "Impossible de copier le texte."
+      }
+    }
+  },
+  "duration_input": {
+    "over_limit": "La durée maximale autorisée est de 23:59:59"
+  },
+  "qr": {
+    "button_download": "Télécharger",
+    "button_print": "Imprimer"
+  },
+  "share": {
+    "not_supported": {
+      "title": "Partage non disponible",
+      "description": "Votre navigateur ne prend pas en charge l’API Web Share."
+    }
+  },
+  "timer": {
+    "action": {
+      "pause": "Pauser",
+      "start": "Démarrer",
+      "reset": "Réinitialiser",
+      "rename": "Renommer",
+      "delete": "Supprimer",
+      "start_pause": "@:timer.action.start / @:timer.action.pause"
+    },
+    "rename": {
+      "title": "Renommer le chronomètre",
+      "placeholder": "Saisissez le nom du chronomètre",
+      "button_rename": "@:timer.action.rename"
+    },
+    "more": "Plus",
+    "other_actions": "Autres actions",
+    "error": {
+      "start": "Une erreur est survenue lors du démarrage du chronomètre.",
+      "pause": "Une erreur est survenue lors de la mise en pause du chronomètre.",
+      "reset": "Une erreur est survenue lors de la réinitialisation du chronomètre.",
+      "add": "Une erreur est survenue lors de l’ajout ou du retrait de temps.",
+      "rename": "Une erreur est survenue lors du renommage du chronomètre.",
+      "delete": "Une erreur est survenue lors de la suppression du chronomètre."
+    },
+    "toast": {
+      "delete": {
+        "title": "Chronomètre supprimé",
+        "description": "Le chronomètre a été supprimé avec succès."
+      }
+    }
+  }
+}

@@ -1,7 +1,7 @@
 <template>
   <UFormField
       :label="label"
-      :error="overLimit ? 'Maximum allowed time is 23:59:59' : undefined"
+      :error="overLimit ? $t('duration_input.over_limit') : undefined"
   >
     <UInput
         ref="input"

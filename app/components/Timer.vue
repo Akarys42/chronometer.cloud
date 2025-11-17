@@ -25,10 +25,10 @@
       <template #content>
         <div class="flex mb-4 flex-col md:flex-row relative">
           <div v-if="permissions === 'edit'" class="flex flex-row justify-center md:justify-start md:flex-col">
-            <UButton loading-auto v-if="!timer.is_paused" icon="i-lucide-circle-pause" size="xl" variant="ghost" color="neutral" @click="pause_timer">Pause</UButton>
-            <UButton loading-auto v-if="timer.is_paused" icon="i-lucide-circle-play" size="xl" variant="ghost" color="neutral" @click="start_timer">Start</UButton>
-            <UButton loading-auto v-if="timer.is_paused" icon="i-lucide-timer-reset" size="xl" variant="ghost" color="neutral" @click="reset_timer">Reset</UButton>
-            <UButton loading-auto icon="i-lucide-menu" size="xl" variant="ghost" color="neutral" @click="() => { are_extra_actions_opened = true }">More</UButton>
+            <UButton loading-auto v-if="!timer.is_paused" icon="i-lucide-circle-pause" size="xl" variant="ghost" color="neutral" @click="pause_timer">{{ $t("timer.action.pause") }}</UButton>
+            <UButton loading-auto v-if="timer.is_paused" icon="i-lucide-circle-play" size="xl" variant="ghost" color="neutral" @click="start_timer">{{ $t("timer.action.start") }}</UButton>
+            <UButton loading-auto v-if="timer.is_paused" icon="i-lucide-timer-reset" size="xl" variant="ghost" color="neutral" @click="reset_timer">{{ $t("timer.action.reset") }}</UButton>
+            <UButton loading-auto icon="i-lucide-menu" size="xl" variant="ghost" color="neutral" @click="() => { are_extra_actions_opened = true }">{{ $t("timer.more") }}</UButton>
           </div>
 
           <TimeDisplay :time="remainingTime" :paused="timer.is_paused && progress > 0" />
@@ -59,29 +59,29 @@
     </UCollapsible>
   </component>
 
-  <USlideover v-model:open="is_renaming" title="Renaming Chronometer">
+  <USlideover v-model:open="is_renaming" :title="$t('timer.rename.title')">
     <template #body>
       <div class="space-y-4">
         <UFormField label="New name" size="xl" required>
-          <UInput v-model="new_name" placeholder="Enter the name of the chronometer" icon="i-lucide-text-cursor-input" />
+          <UInput v-model="new_name" :placeholder="$t('timer.rename.placeholder')" icon="i-lucide-text-cursor-input" />
         </UFormField>
 
-        <UButton loading-auto icon="i-lucide-save" size="xl" :disabled="new_name.length === 0" @click="rename_timer">Rename</UButton>
+        <UButton loading-auto icon="i-lucide-save" size="xl" :disabled="new_name.length === 0" @click="rename_timer">{{ $t("timer.rename.button_rename") }}</UButton>
       </div>
     </template>
   </USlideover>
 
-  <USlideover v-model:open="are_extra_actions_opened" title="Other Actions">
+  <USlideover v-model:open="are_extra_actions_opened" :title="$t('timer.other_actions')">
     <template #body>
       <div class="flex flex-col">
         <UButton loading-auto icon="i-lucide-edit" size="xl" variant="ghost" color="neutral" @click="() => {
           is_renaming = true;
           are_extra_actions_opened = false;
-        }">Rename</UButton>
+        }">{{ $t("timer.action.rename") }}</UButton>
         <UButton loading-auto icon="i-lucide-trash-2" size="xl" variant="ghost" color="error" @click="async () => {
           await delete_timer();
           are_extra_actions_opened = false;
-        }">Delete</UButton>
+        }">{{ $t("timer.action.delete") }}</UButton>
       </div>
     </template>
   </USlideover>
@@ -130,7 +130,7 @@ type TimerType = {
 
 const context_menu_items = ref<ContextMenuItem[]>([
   {
-    label: "Start / Pause",
+    label: $t('timer.action.start_pause'),
     icon: 'i-lucide-circle-play',
     async onSelect() {
       if (props.timer.is_paused) {
@@ -141,21 +141,21 @@ const context_menu_items = ref<ContextMenuItem[]>([
     }
   },
   {
-    label: 'Reset',
+    label: $t('timer.action.reset'),
     icon: 'i-lucide-timer-reset',
     async onSelect() {
       await reset_timer();
     }
   },
   {
-    label: 'Rename',
+    label: $t('timer.action.rename'),
     icon: 'i-lucide-edit',
     onSelect() {
       is_renaming.value = true;
     },
   },
   {
-    label: 'Delete',
+    label: $t('timer.action.delete'),
     icon: 'i-lucide-trash-2',
     color: 'error',
     async onSelect() {
@@ -176,6 +176,7 @@ const is_renaming = ref(false);
 const are_extra_actions_opened = ref(false);
 const new_name = ref(props.timer.name);
 const fullscreen_content = useTemplateRef<Element>("fullscreen_content");
+const toast = useToast();
 
 async function perform_action(action: string, error: string, method: "POST" | "DELETE" = "POST") {
   const end = action.length > 0 ? `/${action}` : "";
@@ -186,28 +187,34 @@ async function perform_action(action: string, error: string, method: "POST" | "D
 }
 
 async function start_timer() {
-  await perform_action("start","Something went wrong while trying to start the chronometer.")
+  await perform_action("start",$t("timer.error.start"));
 }
 
 async function pause_timer() {
-  await perform_action("pause","Something went wrong while trying to pause the chronometer.")
+  await perform_action("pause",$t("timer.error.pause"));
 }
 
 async function reset_timer() {
-  await perform_action("reset","Something went wrong while trying to reset the chronometer.")
+  await perform_action("reset", $t("timer.error.reset"));
 }
 
 async function add_time(seconds: number) {
-  await perform_action("add_time/" + seconds, "Something went wrong while trying to add time to the chronometer.")
+  await perform_action("add_time/" + seconds, $t("timer.error.add_time"));
 }
 
 async function rename_timer() {
-  await perform_action("rename?name=" + encodeURIComponent(new_name.value), "Something went wrong while trying to rename the chronometer.");
+  await perform_action("rename?name=" + encodeURIComponent(new_name.value), $t("timer.error.rename"));
   is_renaming.value = false;
 }
 
 async function delete_timer() {
-  await perform_action("", "Something went wrong while trying to delete the chronometer.", "DELETE");
+  await perform_action("", $t("timer.error.delete"), "DELETE");
+  toast.add({
+    title: $t("timer.toast.delete.title"),
+    description: $t("timer.toast.delete.description"),
+    color: "success",
+    icon: "i-lucide-check-circle",
+  })
 }
 
 const remainingTime = ref(props.timer.remaining_duration)

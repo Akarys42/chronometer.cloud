@@ -13,15 +13,15 @@ const toast = useToast();
 function do_copy() {
   navigator.clipboard.writeText(props.text).then(() => {
     toast.add({
-      title: "Copied!",
-      description: "The text has been copied to your clipboard.",
+      title: $t("copy.toast.success.title"),
+      description: $t("copy.toast.success.description"),
       color: "success",
       icon: "i-lucide-copy-check",
     });
   }).catch(() => {
     toast.add({
-      title: "Error",
-      description: "Failed to copy the text.",
+      title: $t("copy.toast.error.title"),
+      description: $t("copy.toast.error.description"),
       color: "error",
       icon: "i-lucide-alert-triangle",
     });

@@ -4,7 +4,7 @@ import tailwindcss from "@tailwindcss/vite";
 
 export default defineNuxtConfig({
     ssr: false,
-    modules: ['@nuxt/ui'],
+    modules: ['@nuxt/ui', '@nuxtjs/i18n'],
     css: ['~/assets/css/main.css'],
     runtimeConfig: {
         public: {
@@ -22,6 +22,16 @@ export default defineNuxtConfig({
                 { rel: 'icon', type: 'image/x-icon', href: '/favicon.ico' },
             ]
         }
+    },
+    i18n: {
+        locales: [
+            { code: 'en', language: 'en-US', file: 'en.json' },
+            { code: 'fr', language: 'fr-FR', file: 'fr.json' },
+            { code: 'es', language: 'es-ES', file: 'es.json' },
+        ],
+        defaultLocale: 'en',
+        strategy: "no_prefix",
+        detectBrowserLanguage: false,
     },
     nitro: {
         preset: "cloudflare_module",

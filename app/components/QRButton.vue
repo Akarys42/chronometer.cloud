@@ -6,8 +6,8 @@
       <section class="flex justify-center" ref="container"></section>
 
       <div class="flex justify-center grow mt-5">
-        <UButton v-if="data" icon="i-lucide-download" variant="outline" size="xl" color="neutral" @click="do_save">Download</UButton>
-        <UButton v-if="data" icon="i-lucide-printer" variant="outline" size="xl" color="neutral" class="ml-3" @click="do_print">Print</UButton>
+        <UButton v-if="data" icon="i-lucide-download" variant="outline" size="xl" color="neutral" @click="do_save">{{ $t("qr.button_download") }}</UButton>
+        <UButton v-if="data" icon="i-lucide-printer" variant="outline" size="xl" color="neutral" class="ml-3" @click="do_print">{{ $t("qr.button_print") }}</UButton>
       </div>
     </template>
   </UModal>

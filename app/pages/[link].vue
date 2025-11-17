@@ -4,12 +4,12 @@
       <div class="w-full flex flex-col items-center relative">
         <h1 class="text-4xl mb-2 md:mb-5 md:text-5xl font-bold leading-none tracking-tight text-gray-900 dark:text-white text-center grow">{{ page.name }}</h1>
         <UButton v-if="permissions === 'edit'" class="absolute right-0 top-0 invisible md:visible" icon="i-lucide-settings" size="xl" variant="outline" color="neutral" @click="open_settings"/>
-        <UButton v-if="permissions === 'edit'" class="mt-3 w-fit visible md:invisible md:absolute" icon="i-lucide-settings" variant="outline" color="neutral" @click="open_settings">Settings</UButton>
-        <UTooltip :text="connection_status === 'disconnected' ? 'You are currently disconnected from the server. We\'re trying to reconnect you...' : 'You are currently disconnected from the server. Refresh the page to try again.'" :delay-duration="0" class="absolute left-0 bottom-0 md:top-0">
+        <UButton v-if="permissions === 'edit'" class="mt-3 w-fit visible md:invisible md:absolute" icon="i-lucide-settings" variant="outline" color="neutral" @click="open_settings">{{ $t("page.button_settings") }}</UButton>
+        <UTooltip :text="connection_status === 'disconnected' ? $t('page.status.reconnecting') : $t('page.status.disconnected')" :delay-duration="0" class="absolute left-0 bottom-0 md:top-0">
           <UIcon v-if="connection_status === 'disconnected' || connection_status === 'lost'" name="i-lucide-wifi-off" class="size-8 animate-pulsate" :class="connection_status === 'disconnected' ? 'text-warning' : 'text-error'" />
         </UTooltip>
       </div>
-      <p v-if="page.timers.length === 0" class="mt-3 text-xl font-bold leading-none tracking-tight text-gray-800 dark:text-gray-300">No chronometer currently created.</p>
+      <p v-if="page.timers.length === 0" class="mt-3 text-xl font-bold leading-none tracking-tight text-gray-800 dark:text-gray-300">{{ $t("page.no_chronometer") }}</p>
     </div>
     <div v-for="(timer, timer_number) in page.timers">
       <Timer :timer="timer" :permissions="permissions" :link="route.params.link as string" :timer_number="timer_number" :real_time_delta="real_time_delta" />
@@ -17,23 +17,23 @@
     <USeparator v-if="permissions === 'edit'" class="m-2" />
 
     <div v-if="permissions === 'edit'" class="flex flex-col items-center justify-center gap-2 m-5">
-      <h1 class="mb-4 text-2xl md:text-3xl font-bold leading-none tracking-tight text-gray-900 dark:text-white">Create a new chronometer</h1>
+      <h1 class="mb-4 text-2xl md:text-3xl font-bold leading-none tracking-tight text-gray-900 dark:text-white">{{ $t("page.new_chronometer.title") }}</h1>
       <DurationInput v-model="new_timer_duration"/>
-      <UButton loading-auto class="m-2" size="xl" icon="i-lucide-alarm-clock-plus" :disabled="new_timer_duration === 0" @click="create_timer">Add</UButton>
+      <UButton loading-auto class="m-2" size="xl" icon="i-lucide-alarm-clock-plus" :disabled="new_timer_duration === 0" @click="create_timer">{{ $t("page.new_chronometer.button_add") }}</UButton>
     </div>
     <USeparator v-if="permissions === 'edit'" class="m-2" />
 
     <div v-if="permissions === 'edit'" class="flex flex-col grow items-center justify-center gap-2 m-5">
-      <h1 class="mb-4 text-2xl md:text-3xl font-bold leading-none tracking-tight text-gray-900 dark:text-white">Links</h1>
-      <LinkElement text="Private editing link:" :fragment="route.params.link as string"/>
-      <LinkElement text="Public viewing link:" :fragment="page.public_link"/>
+      <h1 class="mb-4 text-2xl md:text-3xl font-bold leading-none tracking-tight text-gray-900 dark:text-white">{{ $t("page.links.title") }}</h1>
+      <LinkElement :text="$t('page.links.private')" :fragment="route.params.link as string"/>
+      <LinkElement :text="$t('page.links.public')" :fragment="page.public_link"/>
     </div>
   </div>
 
   <div v-else class="h-full">
     <div v-if="is_not_found" class="h-full flex flex-col items-center justify-center px-6 text-center space-y-10">
       <p>
-        <span class="text-2xl">This chronometer page doesn't exist</span>
+        <span class="text-2xl">{{ $t("page.not_found.title") }}</span>
       </p>
 
       <ULink to="/">
@@ -44,7 +44,7 @@
             variant="solid"
             loading-auto
         >
-          Go Back
+          {{ $t("page.not_found.button_back") }}
         </UButton>
       </ULink>
     </div>
@@ -55,18 +55,20 @@
     </div>
   </div>
 
-  <USlideover v-model:open="are_settings_open" title="Page settings">
+  <USlideover v-model:open="are_settings_open" :title="$t('page.settings.title')">
     <template #body>
       <div class="space-y-4">
-        <UFormField label="Page name" size="xl" required>
-          <UInput v-model="new_page_name" placeholder="Enter the name of the page" icon="i-lucide-text-cursor-input" />
+        <UFormField :label="$t('page.settings.name')" size="xl" required>
+          <UInput v-model="new_page_name" :placeholder="$t('page.settings.name_placeholder')" icon="i-lucide-text-cursor-input" />
         </UFormField>
 
-        <UFormField label="Page color" size="xl" required>
+        <UFormField :label="$t('page.settings.color')" size="xl" required>
           <TailwindColorPicker v-model:model-value="new_page_color" />
         </UFormField>
 
-        <UButton loading-auto icon="i-lucide-save" size="xl" @click="save_settings" :disabled="new_page_name.length === 0">Save</UButton>
+        <UButton loading-auto icon="i-lucide-save" size="xl" @click="save_settings" :disabled="new_page_name.length === 0">
+          {{ $t('page.settings.button_save') }}
+        </UButton>
       </div>
     </template>
   </USlideover>
@@ -84,6 +86,7 @@ const websocketBackendUrl = useRuntimeConfig().public.websocketBackendUrl;
 const toast = useToast();
 const route = useRoute();
 const appConfig = useAppConfig();
+const i18n = useI18n();
 const new_timer_duration = ref(300);
 const are_settings_open = ref(false);
 const new_page_name = ref("");
@@ -124,8 +127,8 @@ function open_settings() {
 async function create_timer() {
   if (new_timer_duration.value <= 0) {
     toast.add({
-      title: "Invalid duration",
-      description: "Please enter a valid duration greater than 0 seconds.",
+      title: $t("page.toast.invalid_duration.title"),
+      description: $t("page.toast.invalid_duration.description"),
       color: "error",
       icon: "i-lucide-alert-triangle",
     });
@@ -136,15 +139,16 @@ async function create_timer() {
       fetch(backendUrl + "/page/" + route.params.link + "/timers", {
         method: "POST",
         headers: {
-          "Content-Type": "application/json"
+          "Content-Type": "application/json",
+          "User-Locale": i18n.locale.value,
         },
         body: JSON.stringify({duration: new_timer_duration.value})
       }),
-      "Something went wrong while trying to create the chronometer."
+      $t("page.toast.create.error")
   ).then(async r => {
     toast.add({
-      title: "Success!",
-      description: "Chronometer created successfully.",
+      title: $t("page.toast.create.success.title"),
+      description: $t("page.toast.create.success.description"),
       color: "success",
       icon: "i-lucide-check-circle",
     });
@@ -163,11 +167,11 @@ async function save_settings() {
           color: new_page_color.value
         })
       }),
-      "Something went wrong while saving the page settings."
+      $t("page.toast.save.error")
   ).then(async r => {
     toast.add({
-      title: "Success!",
-      description: "Page settings saved successfully.",
+      title: $t("page.toast.save.success.title"),
+      description: $t("page.toast.save.success.description"),
       color: "success",
       icon: "i-lucide-check-circle",
     });
@@ -194,8 +198,8 @@ function connect_websocket() {
 
           if (!socket.isFirstConnection) {
             toast.add({
-              title: "Connected",
-              description: "Successfully connected to the server. Chronometers will update in real-time.",
+              title: $t("page.toast.connect.title"),
+              description: $t("page.toast.connect.description"),
               color: "success",
               icon: "i-lucide-wifi",
             });
@@ -207,8 +211,8 @@ function connect_websocket() {
         onDisconnected(socket: ChronoSocket) {
           if (connection_status.value !== "disconnected") {
             disconnect_toast_id = toast.add({
-              title: "Disconnected",
-              description: "The connection to the server has been lost. Attempting to reconnect...",
+              title: $t("page.toast.disconnect.title"),
+              description: $t("page.toast.disconnect.description"),
               color: "warning",
               icon: "i-lucide-wifi-off",
               duration: -1
@@ -230,14 +234,14 @@ function connect_websocket() {
           connection_status.value = "lost";
 
           lost_toast_id = toast.add({
-            title: "Reconnection failed",
-            description: "Unable to reconnect to the server after multiple attempts. Please refresh the page to try again.",
+            title: $t("page.toast.lost.title"),
+            description: $t("page.toast.lost.description"),
             color: "error",
             icon: "i-lucide-alert-triangle",
             duration: -1,
             actions: [{
               icon: 'i-lucide-refresh-cw',
-              label: 'Reconnect',
+              label: $t('page.toast.lost.action_reconnect'),
               color: 'neutral',
               variant: 'outline',
               onClick: (e) => {
@@ -264,7 +268,7 @@ async function refresh_offset() {
 }
 
 onMounted(async () => {
-  await check_status(fetch(backendUrl + "/page/" + route.params.link, {method: "GET"}), "Something went wrong while looking up the page.", true).then(async r => {
+  await check_status(fetch(backendUrl + "/page/" + route.params.link, {method: "GET"}), $t("page.toast.not_found.description"), true).then(async r => {
     if (r.status === 404) {
       is_not_found.value = true;
     } else {
