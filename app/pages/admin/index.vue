@@ -1,23 +1,108 @@
 <template>
-  <div v-if="(data !== undefined || loading) && !wrong_password">
-    <UButton
-        class="mb-3"
-        icon="i-lucide-refresh-ccw"
-        color="neutral"
-        variant="outline"
-        @click="fetch_data"
-    >Refresh
-    </UButton>
-    <UTable
-        :data="data"
-        :loading="loading"
-        :columns="columns"
-        v-model:sorting="sorting"
-        v-model:column-filters="filter"
-        class="flex-1"
-    />
-  </div>
-  <USkeleton v-else class="m-5 w-max-full h-full"/>
+  <UTabs :items="[
+    {
+      label: 'Overview',
+      slot: 'overview',
+      icon: 'i-lucide-table',
+    },
+    {
+      label: 'Origins',
+      slot: 'origins',
+      icon: 'i-lucide-globe',
+    }
+  ]">
+    <template #list-leading>
+      <UButton
+          class="mr-1"
+          icon="i-lucide-refresh-ccw"
+          color="neutral"
+          variant="outline"
+          @click="fetch_data"
+      >Refresh
+      </UButton>
+    </template>
+
+    <template #overview>
+      <UTable
+          :data="data"
+          :loading="loading"
+          :columns="columns"
+          v-model:sorting="sorting"
+          v-model:column-filters="filter"
+          class="flex-1"
+      />
+    </template>
+
+    <template #origins>
+      <USelect v-model="days_ago" class="mt-3" :items="[
+        {
+          label: 'Last 7 days',
+          value: 7
+        },
+        {
+          label: 'Last 14 days',
+          value: 14
+        },
+        {
+          label: 'Last 30 days',
+          value: 30
+        },
+        {
+          label: 'Last 90 days',
+          value: 90
+        },
+      ]"/>
+
+      <div class="mt-3" v-if="!loading">
+        <UCard
+            v-for="(analytics, origin) in origin_over_time_rum_analytics"
+            :key="origin"
+            v-bind:analytics="analytics as any"
+            v-bind:origin="origin as any as string"
+        >
+          <template #header>
+            <div class="flex flex-row justify-between">
+              <div>
+                <p class="text-5xl font-bold">
+                  {{ origin }}
+                </p>
+              </div>
+              <div class="pl-5 border-l-[3px] border-[var(--ui-border)]">
+                <p class="text-xs text-muted uppercase mb-1.5">
+                  Total Views
+                </p>
+                <p class="text-3xl text-highlighted font-semibold">
+                  {{ format_data_for_vis(analytics).map(r => r.count).reduce((a, b) => a + b, 0) }}
+                </p>
+              </div>
+            </div>
+          </template>
+
+          <VisXYContainer :data="format_data_for_vis(analytics)">
+            <VisLine
+                :x="(_: DataRecord, i: number) => i"
+                :y="(dataRecord: DataRecord) => dataRecord.count"
+                color="var(--ui-primary)"
+            />
+            <VisArea
+                :x="(_: DataRecord, i: number) => i"
+                :y="(dataRecord: DataRecord) => dataRecord.count"
+                color="var(--ui-primary)"
+                :opacity="0.1"
+            />
+            <VisAxis type="x" :tick-format="(i: number) => format(subDays(new Date(), days_ago - i), 'd MMM')"/>
+            <VisAxis type="y"/>
+            <VisCrosshair
+                color="var(--ui-primary)"
+                :template="(dataRecord: DataRecord) => `${format(dataRecord.date, 'd MMM')}: ${dataRecord.count}`"
+            />
+            <VisTooltip/>
+          </VisXYContainer>
+        </UCard>
+      </div>
+      <UProgress v-else class="mt-3"/>
+    </template>
+  </UTabs>
 
   <UModal title="Enter password" :open="data === undefined && !loading">
     <template #body>
@@ -61,15 +146,21 @@
 
 <script setup lang="ts">
 import type {TableColumn} from "#ui/components/Table.vue";
-import type {Column} from "@tanstack/table-core";
+import type {Column, Row} from "@tanstack/table-core";
+import {VisArea, VisAxis, VisCrosshair, VisLine, VisTooltip, VisXYContainer} from '@unovis/vue'
 import {UButton, UDropdownMenu, UIcon} from "#components";
 import {unique} from "~/utils";
+import {eachDayOfInterval, format, interval, subDays} from "date-fns";
 
 const backendUrl = useRuntimeConfig().public.backendUrl;
 
+const data = ref(undefined);
+const per_path_rum_analytics = ref(undefined);
+const origin_over_time_rum_analytics = ref(undefined);
+const days_ago = ref(14);
+
 const password = ref("");
 const show_password = ref(false);
-const data = ref(undefined);
 const loading = ref(false);
 const wrong_password = ref(false);
 const sorting = ref([{
@@ -134,6 +225,19 @@ function getHeader(column: Column<any>, label: string) {
         'aria-label': `Sort by ${isSorted === 'asc' ? 'descending' : 'ascending'}`
       })
   )
+}
+
+function get_views(row: Row<any>): number {
+  if (per_path_rum_analytics.value === undefined) {
+    return 0;
+  }
+
+  const origin = (new URL(row.getValue<string>("origin"))).hostname;
+  const public_link = "/" + row.getValue<string>("public_link");
+  const private_link = "/" + row.getValue<string>("edit_link");
+  const public_link_analytics = per_path_rum_analytics.value[origin]?.[public_link] || 0;
+  const private_link_analytics = per_path_rum_analytics.value[origin]?.[private_link] || 0;
+  return public_link_analytics + private_link_analytics;
 }
 
 const columns: TableColumn<any>[] = [
@@ -236,13 +340,62 @@ const columns: TableColumn<any>[] = [
     filterFn: (row: any, columnId: string, filterValue: string[]) => {
       return !filterValue.includes(row.getValue(columnId));
     },
+  },
+  {
+    accessorKey: "views",
+    header: ({column}) => getHeader(column, "Views"),
+    cell: ({row}) => {
+      if (per_path_rum_analytics.value === undefined) {
+        return h(UIcon, {name: "i-lucide-loader-circle", class: "inline-block animate-spin size-5"});
+      }
+
+      const analytics = get_views(row);
+
+      if (analytics === 0) {
+        return "No data";
+      } else {
+        return h(
+            "span",
+            {class: "flex"},
+            [
+              analytics.toString(),
+              h(UIcon, {name: "i-lucide-eye", class: "inline-block ml-2 size-5"})
+            ]
+        );
+      }
+    },
+    sortingFn: (rowA: Row<any>, rowB: Row<any>) => {
+      if (per_path_rum_analytics.value === undefined) {
+        return 0;
+      }
+
+      return get_views(rowA) - get_views(rowB);
+    }
   }
 ]
+
+type DataRecord = {
+  date: Date,
+  count: number
+}
+
+function format_data_for_vis(data: any): DataRecord[] {
+  const dates = eachDayOfInterval(interval(subDays(new Date(), days_ago.value), new Date()));
+
+  return dates.map(date => {
+    const date_str = date.toISOString().split("T")[0];
+
+    return {
+      date: date,
+      count: data[date_str!] || 0
+    }
+  });
+}
 
 async function fetch_data(): Promise<void> {
   loading.value = true;
 
-  await fetch(backendUrl + "/admin/index", {
+  const json = await fetch(backendUrl + "/admin/index", {
     headers: {
       "Authorization": "Plain " + password.value
     }
@@ -253,8 +406,43 @@ async function fetch_data(): Promise<void> {
         if (r.status == 401) {
           wrong_password.value = true;
         } else {
-          data.value = await r.json();
+          const json = await r.json();
+          data.value = json;
+          return json;
         }
       })
+
+  const hosts = json.map((item: any) => item.origin)
+      .map((origin: string) => (new URL(origin).hostname))
+      .filter(unique)
+      .filter((host: string) => host !== "")
+      .join(",")
+
+  await fetch(backendUrl + "/admin/rum_analytics?hosts=" + hosts, {
+    headers: {
+      "Authorization": "Plain " + password.value
+    }
+  }).then(async r => {
+    if (r.status == 200) {
+      const analytics = await r.json()
+      per_path_rum_analytics.value = analytics.per_path;
+      origin_over_time_rum_analytics.value = analytics.origin_over_time;
+    }
+  });
 }
 </script>
+
+<style scoped>
+.unovis-xy-container {
+  --vis-crosshair-line-stroke-color: var(--ui-primary);
+  --vis-crosshair-circle-stroke-color: var(--ui-bg);
+
+  --vis-axis-grid-color: var(--ui-border);
+  --vis-axis-tick-color: var(--ui-border);
+  --vis-axis-tick-label-color: var(--ui-text-dimmed);
+
+  --vis-tooltip-background-color: var(--ui-bg);
+  --vis-tooltip-border-color: var(--ui-border);
+  --vis-tooltip-text-color: var(--ui-text-highlighted);
+}
+</style>

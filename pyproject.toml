@@ -17,6 +17,7 @@ websockets = "^15.0.1"
 pymongo = "^4.14.0"
 slowapi = "^0.1.9"
 fastapi-utils = "^0.8.0"
+aiohttp = {extras = ["speedups"], version = "^3.13.2"}
 
 [tool.poetry.dev-dependencies]
 isort = "^5.12.0"

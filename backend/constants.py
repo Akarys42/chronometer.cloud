@@ -18,4 +18,8 @@ MONGO_DATABASE = get_required_env_var("MONGO_DATABASE")
 ADMIN_PASSWORD_HASH = os.environ.get("ADMIN_PASSWORD_HASH")
 FAILED_PASSWORD_BAN = datetime.timedelta(minutes=1)
 
+CLOUDFLARE_ACCOUNT_ID = os.environ.get("CLOUDFLARE_ACCOUNT_ID")
+CLOUDFLARE_API_TOKEN = os.environ.get("CLOUDFLARE_API_TOKEN")
+
 EXPIRATION = 7 * 24 * 60 * 60  # 7 days in seconds
+CLOUDFLARE_GRAPHQL_ENDPOINT = "https://api.cloudflare.com/client/v4/graphql"

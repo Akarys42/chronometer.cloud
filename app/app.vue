@@ -1,5 +1,6 @@
 <template>
   <UApp>
+    <NuxtLoadingIndicator />
     <div class="flex flex-col min-h-screen">
       <header class="border-b border-gray-200 dark:border-gray-800 bg-black/15">
         <UContainer class="relative flex items-center justify-center md:justify-start py-4">

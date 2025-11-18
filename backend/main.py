@@ -17,6 +17,7 @@ from starlette.requests import Request
 from starlette.responses import JSONResponse
 from websockets import ConnectionClosed
 
+from backend.analytics import RUMAnalytics, retrieve_rum_analytics
 from backend.constants import ADMIN_PASSWORD_HASH, EXPIRATION, FAILED_PASSWORD_BAN
 from backend.lang import DEFAULT_LOCALE, DEFAULT_PAGE_NAME, DEFAULT_TIMER_NAME
 from backend.timer import Timer, TimerPage
@@ -231,9 +232,8 @@ async def modify_page_settings(edit_link: str, settings: ModifyPageSettings) -> 
     await page.save()
 
 
-@app.get("/admin/index")
-async def admin_index(request: Request) -> list:
-    """Get an index of all pages for admin purposes."""
+def check_admin_auth(request: Request) -> None:
+    """Check if the request is authorized for admin access."""
     if not ADMIN_PASSWORD_HASH:
         raise HTTPException(status_code=401, detail="Not configured")
 
@@ -254,12 +254,27 @@ async def admin_index(request: Request) -> list:
 
         raise HTTPException(status_code=401, detail="Unauthorized")
 
+
+@app.get("/admin/index")
+async def admin_index(request: Request) -> list:
+    """Get an index of all pages for admin purposes."""
+    check_admin_auth(request)
+
     index = []
 
     for page in edit_links.values():
         index.append(page.to_full_json())
 
     return index
+
+
+@app.get("/admin/rum_analytics")
+async def admin_rum_analytics(request: Request, hosts: str) -> RUMAnalytics:
+    """Get RUM analytics from Cloudflare."""
+    check_admin_auth(request)
+
+    hosts = hosts.split(",")
+    return await retrieve_rum_analytics(hosts)
 
 
 @app.websocket("/subscribe/{link}")

@@ -9,6 +9,8 @@ services:
     tty: true
     ports:
       - "8000:8000"
+    env_file:
+      - .env
     environment:
       - USE_RELOADER=true
       - MONGO_URI=mongodb://root:password@mongo:27017/
