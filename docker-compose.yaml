@@ -17,18 +17,6 @@ services:
       - MONGO_DATABASE=chronometer-cloud
       - ADMIN_PASSWORD_HASH=ef260e9aa3c673af240d17a2660480361a8e081d1ffeca2a5ed0e3219fc18567  # dev
 
-  frontend:
-    build:
-      context: .
-      dockerfile: frontend.Dockerfile
-    volumes:
-      - .:/frontend:rw
-    tty: true
-    ports:
-      - "3000:3000"
-    environment:
-      NUXT_PUBLIC_BACKEND_URL: "${BACKEND_URL:-http://0.0.0.0:8000}"
-
   mongo:
     image: mongo
     environment:

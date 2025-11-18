@@ -16,4 +16,4 @@ RUN poetry install --only main
 ARG git_sha="development"
 ENV GIT_SHA=$git_sha
 
-COPY . .
+COPY backend LICENSE ./
