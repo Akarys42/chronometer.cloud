@@ -73,6 +73,13 @@ const langs = [
     onClick: () => {
       set_locale("es")
     }
+  },
+  {
+    label: 'Italiano',
+    icon: 'i-circle-flags-it',
+    onClick: () => {
+      set_locale("it")
+    }
   }
 ]
 
