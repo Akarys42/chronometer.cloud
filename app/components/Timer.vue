@@ -78,10 +78,16 @@
           is_renaming = true;
           are_extra_actions_opened = false;
         }">{{ $t("timer.action.rename") }}</UButton>
+
         <UButton loading-auto icon="i-lucide-trash-2" size="xl" variant="ghost" color="error" @click="async () => {
           await delete_timer();
           are_extra_actions_opened = false;
         }">{{ $t("timer.action.delete") }}</UButton>
+
+        <UButton class="md:hidden" icon="i-lucide-square-mouse-pointer" size="xl" variant="ghost" @click="() => {
+          is_remote_mode = true
+          are_extra_actions_opened = false
+        }">{{ $t("timer.remote_mode.enter") }}</UButton>
       </div>
     </template>
   </USlideover>
@@ -111,6 +117,35 @@
       </div>
     </template>
   </UModal>
+
+  <UModal fullscreen v-model:open="is_remote_mode">
+    <template #content>
+      <div class="flex flex-col w-full h-full">
+        <div class="flex items-center justify-center flex-col mt-5">
+          <div class="flex flex-col gap-2">
+            <h1 class="text-2xl font-bold leading-none tracking-tight text-gray-900 dark:text-white text-center grow">{{ timer.name }}</h1>
+            <TimeDisplay class="max-h-fit" :time="remainingTime" :paused="timer.is_paused && progress > 0" />
+            <UProgress v-model="progress" class="w-inherit" :max="1" :color="progress === 1 ? 'error' : 'primary'"/>
+          </div>
+        </div>
+
+        <div class="flex flex-col grow items-center justify-evenly gap-8">
+          <UButton class="w-fit rounded-full border-8" variant="subtle" color="neutral" size="xl">
+            <UIcon name="i-lucide-pause" class="size-50 m-8" />
+          </UButton>
+          <UButton class="w-fit rounded-full border-8" variant="subtle" color="neutral" size="xl">
+            <UIcon name="i-lucide-rotate-ccw" class="size-50 m-8" />
+          </UButton>
+        </div>
+
+        <div class="flex items-center justify-center mb-5">
+          <UButton icon="i-lucide-x" size="xl" variant="subtle" color="neutral" @click="is_remote_mode = false">
+            {{ $t("timer.remote_mode.exit") }}
+          </UButton>
+        </div>
+      </div>
+    </template>
+  </UModal>
 </template>
 
 <script setup lang="ts">
@@ -127,6 +162,28 @@ type TimerType = {
   full_duration: number,
   real_time_delta: number,
 }
+
+const props = defineProps<{
+  timer: TimerType,
+  permissions: "public" | "edit",
+  link: string,
+  timer_number: number,
+  real_time_delta: number,
+}>();
+
+const backendUrl = useRuntimeConfig().public.backendUrl;
+const toast = useToast();
+const component = useTemplateRef("component");
+
+const is_renaming = ref(false);
+const are_extra_actions_opened = ref(false);
+const new_name = ref(props.timer.name);
+
+const isFullscreen = ref(false);
+const showFullscreenButton = ref(true);
+let hideTimer: ReturnType<typeof setTimeout> | null = null;
+
+const is_remote_mode = ref(false);
 
 const context_menu_items: ContextMenuItem[] = [
   {
@@ -166,20 +223,6 @@ const context_menu_items: ContextMenuItem[] = [
     }
   }
 ]
-
-const props = defineProps<{
-  timer: TimerType,
-  permissions: "public" | "edit",
-  link: string,
-  timer_number: number,
-  real_time_delta: number,
-}>();
-const backendUrl = useRuntimeConfig().public.backendUrl;
-const is_renaming = ref(false);
-const are_extra_actions_opened = ref(false);
-const new_name = ref(props.timer.name);
-const toast = useToast();
-const component = useTemplateRef("component");
 
 async function perform_action(action: string, error: string, method: "POST" | "DELETE" = "POST") {
   const end = action.length > 0 ? `/${action}` : "";
@@ -247,10 +290,6 @@ const progress = computed(() => {
   const full = props.timer.full_duration
   return Math.max(0, Math.min(full > 0 ? ((full - remainingTime.value) / full) : 0, 1))
 })
-
-const isFullscreen = ref(false);
-const showFullscreenButton = ref(true);
-let hideTimer: ReturnType<typeof setTimeout> | null = null;
 
 function resetHideTimer() {
   showFullscreenButton.value = true;

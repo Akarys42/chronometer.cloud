@@ -151,6 +151,10 @@
       "rename": "Something went wrong while trying to rename the chronometer.",
       "delete": "Something went wrong while trying to delete the chronometer."
     },
+    "remote_mode": {
+      "enter": "Enter remote mode",
+      "exit": "Exit remote mode"
+    },
     "toast": {
       "delete": {
         "title": "Chronometer deleted",

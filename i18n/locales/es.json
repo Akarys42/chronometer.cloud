@@ -151,6 +151,10 @@
       "rename": "Ocurrió un error al renombrar el cronómetro.",
       "delete": "Ocurrió un error al eliminar el cronómetro."
     },
+    "remote_mode": {
+      "enter": "Entrar en modo remoto",
+      "exit": "Salir del modo remoto"
+    },
     "toast": {
       "delete": {
         "title": "Cronómetro eliminado",
