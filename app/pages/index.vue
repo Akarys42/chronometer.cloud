@@ -61,6 +61,13 @@ async function create_page() {
   });
 }
 
+defineShortcuts({
+  enter: () => create_page(),
+  "a-d": () => {
+    navigateTo("/admin");
+  }
+})
+
 useSeoMeta({
   title: "Cloud-Synchronized Chronometers",
   description: "Create and share synchronized chronometers for your events. Perfect for in-person or remote coordination.",

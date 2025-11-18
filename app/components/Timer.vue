@@ -3,7 +3,7 @@
     :is="permissions === 'edit' ? UContextMenu : 'div'"
     v-bind="permissions === 'edit' ? { items: context_menu_items, class: 'mb-8' } : {}"
   >
-    <UCollapsible default-open :unmount-on-hide="false" class="flex flex-col gap-2">
+    <UCollapsible default-open :unmount-on-hide="false" class="flex flex-col gap-2" ref="component">
       <UButton
           :label="timer.name"
           size="xl"
@@ -63,7 +63,7 @@
     <template #body>
       <div class="space-y-4">
         <UFormField label="New name" size="xl" required>
-          <UInput v-model="new_name" :placeholder="$t('timer.rename.placeholder')" icon="i-lucide-text-cursor-input" />
+          <UInput v-model="new_name" :placeholder="$t('timer.rename.placeholder')" icon="i-lucide-text-cursor-input" @keydown.enter="rename_timer" />
         </UFormField>
 
         <UButton loading-auto icon="i-lucide-save" size="xl" :disabled="new_name.length === 0" @click="rename_timer">{{ $t("timer.rename.button_rename") }}</UButton>
@@ -88,7 +88,7 @@
 
   <UModal fullscreen v-model:open="isFullscreen">
     <template #content>
-      <div ref="fullscreen_content" class="w-full h-full flex items-center justify-center flex-col">
+      <div class="w-full h-full flex items-center justify-center flex-col">
         <UButton
             v-if="permissions === 'public'"
             icon="i-lucide-maximize-2"
@@ -114,7 +114,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted, computed } from 'vue'
+import { ref, onMounted, onUnmounted, computed, useTemplateRef } from 'vue'
 import type { ContextMenuItem } from '@nuxt/ui'
 import {check_status} from "~/utils";
 import {UContextMenu} from "#components";
@@ -128,10 +128,11 @@ type TimerType = {
   real_time_delta: number,
 }
 
-const context_menu_items = ref<ContextMenuItem[]>([
+const context_menu_items: ContextMenuItem[] = [
   {
     label: $t('timer.action.start_pause'),
     icon: 'i-lucide-circle-play',
+    kbds: ['s'],
     async onSelect() {
       if (props.timer.is_paused) {
         await start_timer();
@@ -143,6 +144,7 @@ const context_menu_items = ref<ContextMenuItem[]>([
   {
     label: $t('timer.action.reset'),
     icon: 'i-lucide-timer-reset',
+    kbds: ['r'],
     async onSelect() {
       await reset_timer();
     }
@@ -150,6 +152,7 @@ const context_menu_items = ref<ContextMenuItem[]>([
   {
     label: $t('timer.action.rename'),
     icon: 'i-lucide-edit',
+    kbds: ['e'],
     onSelect() {
       is_renaming.value = true;
     },
@@ -162,7 +165,7 @@ const context_menu_items = ref<ContextMenuItem[]>([
       await delete_timer()
     }
   }
-])
+]
 
 const props = defineProps<{
   timer: TimerType,
@@ -175,8 +178,8 @@ const backendUrl = useRuntimeConfig().public.backendUrl;
 const is_renaming = ref(false);
 const are_extra_actions_opened = ref(false);
 const new_name = ref(props.timer.name);
-const fullscreen_content = useTemplateRef<Element>("fullscreen_content");
 const toast = useToast();
+const component = useTemplateRef("component");
 
 async function perform_action(action: string, error: string, method: "POST" | "DELETE" = "POST") {
   const end = action.length > 0 ? `/${action}` : "";
@@ -276,6 +279,33 @@ async function onFullscreenChange() {
     isFullscreen.value = false;
   }
 }
+
+function is_hovering() {
+  if (!component.value) return false;
+  return component.value.$el.matches(":hover");
+}
+
+defineShortcuts({
+  s: async () => {
+    if (props.permissions !== "edit") return;
+    if (!is_hovering()) return;
+    if (props.timer.is_paused) {
+      await start_timer();
+    } else {
+      await pause_timer();
+    }
+  },
+  r: async () => {
+    if (props.permissions !== "edit") return;
+    if (!is_hovering()) return;
+    await reset_timer();
+  },
+  e: () => {
+    if (props.permissions !== "edit") return;
+    if (!is_hovering()) return;
+    is_renaming.value = true;
+  },
+})
 
 onMounted(() => {
   window.addEventListener("mousemove", resetHideTimer);

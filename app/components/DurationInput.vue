@@ -13,6 +13,7 @@
         @focus="moveCursorToEnd"
         @click="moveCursorToEnd"
         @blur="onBlur"
+        name="duration-input"
         size="xl"
         :ui="{
           root: 'w-fit',

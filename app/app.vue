@@ -2,7 +2,7 @@
   <UApp>
     <NuxtLoadingIndicator />
 
-    <UDashboardGroup>
+    <UDashboardGroup class="!overflow-visible !relative">
       <UDashboardPanel>
         <div class="flex flex-col min-h-screen">
           <header class="border-b border-gray-200 dark:border-gray-800 bg-black/15">

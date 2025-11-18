@@ -112,7 +112,7 @@
     </template>
   </UTabs>
 
-  <UModal title="Enter password" :open="data === undefined && !loading">
+  <UModal title="Enter password" :open="data === undefined && !loading" :close="{ onClick: () => { navigateTo('/') } }">
     <template #body>
       <div class="flex justify-center">
         <UFieldGroup>
@@ -121,6 +121,7 @@
               placeholder="Password"
               size="xl"
               :type="show_password ? 'text' : 'password'"
+              @keydown.enter="fetch_data"
           >
             <template #trailing>
               <UButton

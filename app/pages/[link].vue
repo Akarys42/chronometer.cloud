@@ -59,7 +59,7 @@
     <template #body>
       <div class="space-y-4">
         <UFormField :label="$t('page.settings.name')" size="xl" required>
-          <UInput v-model="new_page_name" :placeholder="$t('page.settings.name_placeholder')" icon="i-lucide-text-cursor-input" />
+          <UInput v-model="new_page_name" :placeholder="$t('page.settings.name_placeholder')" icon="i-lucide-text-cursor-input" @keydown.enter="save_settings" />
         </UFormField>
 
         <UFormField :label="$t('page.settings.color')" size="xl" required>
@@ -340,7 +340,20 @@ onBeforeUnmount(() => {
 });
 
 defineShortcuts({
-  "d-e": () => {
+  x: () => {
+    if (permissions.value === "edit") {
+      are_settings_open.value = !are_settings_open.value;
+    }
+  },
+  enter: {
+    usingInput: "duration-input",
+    handler: () => {
+      if (permissions.value === "edit" && new_timer_duration.value > 0) {
+        create_timer();
+      }
+    }
+  },
+  "d-b": () => {
     show_debug.value = !show_debug.value;
   }
 })
