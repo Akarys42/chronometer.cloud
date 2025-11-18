@@ -61,17 +61,25 @@
             v-bind:origin="origin as any as string"
         >
           <template #header>
-            <div class="flex flex-row justify-between">
+            <div class="flex flex-col md:flex-row justify-between">
               <div>
-                <p class="text-5xl font-bold">
+                <p class="text-2xl md:text-5xl font-bold">
                   {{ origin }}
                 </p>
               </div>
-              <div class="pl-5 border-l-[3px] border-[var(--ui-border)]">
+              <div class="hidden md:block pl-5 md:border-l-[3px] border-[var(--ui-border)]">
                 <p class="text-xs text-muted uppercase mb-1.5">
                   Total Views
                 </p>
                 <p class="text-3xl text-highlighted font-semibold">
+                  {{ format_data_for_vis(analytics).map(r => r.count).reduce((a, b) => a + b, 0) }}
+                </p>
+              </div>
+              <div class="md:hidden text-sm flex flex-row">
+                <p class="text-muted uppercase mr-1">
+                  Total Views:
+                </p>
+                <p class="text-highlighted font-semibold">
                   {{ format_data_for_vis(analytics).map(r => r.count).reduce((a, b) => a + b, 0) }}
                 </p>
               </div>
