@@ -129,11 +129,17 @@
           </div>
         </div>
 
-        <div class="flex flex-col grow items-center justify-evenly gap-8">
-          <UButton class="w-fit rounded-full border-8" variant="subtle" color="neutral" size="xl">
-            <UIcon name="i-lucide-pause" class="size-50 m-8" />
+        <div class="flex flex-col grow items-center justify-evenly">
+          <UButton class="w-fit rounded-full border-8" variant="subtle" color="neutral" size="xl" @click="async () => {
+            if (timer.is_paused) {
+              await start_timer();
+            } else {
+              await pause_timer();
+            }
+          }">
+            <UIcon :name="timer.is_paused ? 'i-lucide-play' : 'i-lucide-pause'" class="size-50 m-8" />
           </UButton>
-          <UButton class="w-fit rounded-full border-8" variant="subtle" color="neutral" size="xl">
+          <UButton class="w-fit rounded-full border-8" variant="subtle" color="neutral" size="xl" @click="reset_timer">
             <UIcon name="i-lucide-rotate-ccw" class="size-50 m-8" />
           </UButton>
         </div>
