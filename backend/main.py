@@ -1,7 +1,7 @@
 import asyncio
 import datetime
 import json
-import os
+import logging
 import time
 from contextlib import asynccontextmanager
 from typing import Any, AsyncGenerator
@@ -18,7 +18,15 @@ from starlette.responses import JSONResponse
 from websockets import ConnectionClosed
 
 from backend.analytics import RUMAnalytics, retrieve_rum_analytics
-from backend.constants import ADMIN_PASSWORD_HASH, EXPIRATION, FAILED_PASSWORD_BAN
+from backend.constants import (
+    ADMIN_PASSWORD_HASH,
+    DEVELOPMENT,
+    EXPIRATION,
+    FAILED_PASSWORD_BAN,
+    GIT_SHA,
+    MONGO_DATABASE,
+    MONGO_URI,
+)
 from backend.lang import get_locale_from_request
 from backend.timer import Timer, TimerPage
 from backend.utils import PrunableDict, get_remote_address, sha256
@@ -29,8 +37,11 @@ public_links: PrunableDict[str, TimerPage] = PrunableDict()
 websocket_manager = WebsocketManager()
 last_failed_password_entry: dict[str, datetime.datetime] = {}
 
-client = AsyncMongoClient(os.environ.get("MONGO_URI"))
-collection = client[os.environ.get("MONGO_DATABASE")].pages
+logging.basicConfig(level=logging.INFO, format="%(levelname)-10s%(message)s")
+logging.info("Launching version %s", GIT_SHA)
+
+client = AsyncMongoClient(MONGO_URI)
+collection = client[MONGO_DATABASE].pages
 
 
 async def create_tld_index() -> None:
@@ -81,12 +92,14 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, Any]:
     await reload_data()
     await remove_expired_entries()  # Start the periodic task to prune expired entries
     app.state.ready = True
+    logging.info("App is ready to receive requests.")
     yield
+    logging.warning("Shutting down application.")
     app.state.ready = False
 
 
 limiter = Limiter(key_func=get_remote_address)
-app = FastAPI(lifespan=lifespan)
+app = FastAPI(lifespan=lifespan, docs_url="/docs" if DEVELOPMENT else None, redoc_url=None)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],

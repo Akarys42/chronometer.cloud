@@ -12,6 +12,9 @@ def get_required_env_var(var_name: str) -> str:
     return value
 
 
+GIT_SHA = get_required_env_var("GIT_SHA")
+DEVELOPMENT = GIT_SHA == "development"
+
 MONGO_URI = get_required_env_var("MONGO_URI")
 MONGO_DATABASE = get_required_env_var("MONGO_DATABASE")
 
