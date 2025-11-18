@@ -39,8 +39,21 @@ query rumData(
         }
       }
 
-      originData: rumPageloadEventsAdaptiveGroups(
-        filter: {datetime_lt: $now, datetime_geq: $longSampling, requestHost_in: $hosts, bot: 0},
+      shortOriginData: rumPageloadEventsAdaptiveGroups(
+        filter: {datetime_lt: $now, datetime_geq: $shortSampling, requestHost_in: $hosts, bot: 0},
+        limit: 10000
+      ) {
+        count
+        dimensions {
+          requestHost
+          date
+        }
+      }
+
+      longOriginData: rumPageloadEventsAdaptiveGroups(
+        filter: {
+          datetime_lt: $shortSampling, datetime_geq: $longSampling, requestHost_in: $hosts, bot: 0
+        },
         limit: 10000
       ) {
         count
@@ -97,31 +110,19 @@ async def retrieve_rum_analytics(hosts: list[str]) -> RUMAnalytics:
     short_data = response["data"]["viewer"]["accounts"][0]["shortPathData"]
     long_data = response["data"]["viewer"]["accounts"][0]["longPathData"]
 
-    for entry in short_data:
-        host = entry["dimensions"]["requestHost"]
-        path = entry["dimensions"]["requestPath"]
-        count = entry["count"]
+    for dataset in (long_data, short_data):
+        for entry in dataset:
+            host = entry["dimensions"]["requestHost"]
+            path = entry["dimensions"]["requestPath"]
+            count = entry["count"]
 
-        if host not in per_path:
-            per_path[host] = {}
+            if host not in per_path:
+                per_path[host] = {}
 
-        if path not in per_path[host]:
-            per_path[host][path] = 0
+            if path not in per_path[host]:
+                per_path[host][path] = 0
 
-        per_path[host][path] += count
-
-    for entry in long_data:
-        host = entry["dimensions"]["requestHost"]
-        path = entry["dimensions"]["requestPath"]
-        count = entry["count"]
-
-        if host not in per_path:
-            per_path[host] = {}
-
-        if path not in per_path[host]:
-            per_path[host][path] = 0
-
-        per_path[host][path] += count
+            per_path[host][path] += count
 
     for host in per_path:
         for path in FILTERED_PATHS:
@@ -130,15 +131,18 @@ async def retrieve_rum_analytics(hosts: list[str]) -> RUMAnalytics:
 
     origin_over_time: dict[str, dict[str, int]] = {}
 
-    origin_data = response["data"]["viewer"]["accounts"][0]["originData"]
-    for entry in origin_data:
-        host = entry["dimensions"]["requestHost"]
-        date = entry["dimensions"]["date"]
-        count = entry["count"]
+    short_origin_data = response["data"]["viewer"]["accounts"][0]["shortOriginData"]
+    long_origin_data = response["data"]["viewer"]["accounts"][0]["longOriginData"]
 
-        if host not in origin_over_time:
-            origin_over_time[host] = {}
+    for dataset in (long_origin_data, short_origin_data):
+        for entry in dataset:
+            host = entry["dimensions"]["requestHost"]
+            date = entry["dimensions"]["date"]
+            count = entry["count"]
 
-        origin_over_time[host][date] = count
+            if host not in origin_over_time:
+                origin_over_time[host] = {}
+
+            origin_over_time[host][date] = count
 
     return RUMAnalytics(per_path=per_path, origin_over_time=origin_over_time)
