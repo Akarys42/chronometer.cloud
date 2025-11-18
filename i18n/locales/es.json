@@ -157,5 +157,9 @@
         "description": "El cronómetro se ha eliminado correctamente."
       }
     }
+  },
+  "backend": {
+    "default_page_name": "Cronómetros sincronizados en la nube",
+    "default_timer_name": "Cronómetro"
   }
 }

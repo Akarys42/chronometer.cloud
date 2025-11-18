@@ -19,7 +19,7 @@ from websockets import ConnectionClosed
 
 from backend.analytics import RUMAnalytics, retrieve_rum_analytics
 from backend.constants import ADMIN_PASSWORD_HASH, EXPIRATION, FAILED_PASSWORD_BAN
-from backend.lang import DEFAULT_LOCALE, DEFAULT_PAGE_NAME, DEFAULT_TIMER_NAME
+from backend.lang import get_locale_from_request
 from backend.timer import Timer, TimerPage
 from backend.utils import PrunableDict, get_remote_address, sha256
 from backend.websocket_manager import WebsocketManager
@@ -122,12 +122,10 @@ async def remove_expired_entries() -> None:
 @limiter.limit("5/minute")
 async def new_page(request: Request) -> dict:
     """Create a new page."""
-    user_locale = request.headers.get("User-Locale", DEFAULT_LOCALE)
+    locale = get_locale_from_request(request)
     origin = request.headers.get("Origin", "unknown://")
 
-    page = TimerPage(
-        websocket_manager, collection, name=DEFAULT_PAGE_NAME[user_locale], origin=origin
-    )
+    page = TimerPage(websocket_manager, collection, name=locale.default_page_name, origin=origin)
     await page.save()
 
     edit_links[page.edit_link] = page
@@ -213,9 +211,9 @@ async def create_timer(edit_link: str, new_timer: NewTimer, request: Request) ->
     if not page:
         raise HTTPException(status_code=404, detail="Page not found")
 
-    user_locale = request.headers.get("User-Locale", DEFAULT_LOCALE)
+    locale = get_locale_from_request(request)
 
-    await page.create_timer(new_timer.duration, name=DEFAULT_TIMER_NAME[user_locale])
+    await page.create_timer(new_timer.duration, name=locale.default_timer_name)
 
 
 @app.put("/page/{edit_link}/settings", status_code=204)

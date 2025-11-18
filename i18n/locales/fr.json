@@ -157,5 +157,9 @@
         "description": "Le chronomètre a été supprimé avec succès."
       }
     }
+  },
+  "backend": {
+    "default_page_name": "Chronomètres synchronisés dans le cloud",
+    "default_timer_name": "Chronomètre"
   }
 }

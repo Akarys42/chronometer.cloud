@@ -1,7 +1,8 @@
+import dataclasses
 import hashlib
 import random
 import string
-from typing import Dict, Generic, Iterable, Protocol, TypeVar
+from typing import Any, Dict, Generic, Iterable, Protocol, TypeVar
 
 from starlette.requests import Request
 
@@ -85,3 +86,10 @@ def get_remote_address(request: Request) -> str:
 def sha256(data: str) -> str:
     """Return the SHA-256 hash of the given data as a hexadecimal string."""
     return hashlib.sha256(data.encode("utf8")).hexdigest()
+
+
+def dataclass_shallow_dict(
+    instance: Any,  # noqa: ANN401 - we cannot constrain to dataclass types
+) -> dict:
+    """Create a shallow copy of a dataclass instance."""
+    return {field.name: getattr(instance, field.name) for field in dataclasses.fields(instance)}

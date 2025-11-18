@@ -157,5 +157,9 @@
         "description": "The chronometer has been successfully deleted."
       }
     }
+  },
+  "backend": {
+    "default_page_name": "Cloud-synchronized chronometers",
+    "default_timer_name": "Chronometer"
   }
 }
