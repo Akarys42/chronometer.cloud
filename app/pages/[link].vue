@@ -83,6 +83,8 @@
           <div>Locale: {{ i18n.locale.value }}</div>
           <div>New timer duration: {{ new_timer_duration }}s</div>
           <div>Endpoints: {{ backendUrl }} | {{ websocketBackendUrl }}</div>
+          <div>Remote version: {{ remote_version }}</div>
+          <div>Local version: {{ local_version }}</div>
         </div>
       </template>
     </UDrawer>
@@ -110,6 +112,8 @@ const connection_status = ref<"connected" | "disconnected" | "lost">("disconnect
 const is_not_found = ref(false);
 const real_time_delta = ref(0);
 const show_debug = ref(false);
+const remote_version = useState("unknown");
+const local_version = useRuntimeConfig().public.gitSha;
 let websocket: ChronoSocket | null;
 let disconnect_toast_id: string | number | null;
 let lost_toast_id: string | number | null;
@@ -305,6 +309,14 @@ onMounted(async () => {
   refresh_real_time_delta_interval_id = window.setInterval(() => {
     refresh_offset();
   }, 60000); // Refresh every 60 seconds
+
+  await fetch(backendUrl + "/version")
+      .then(r => r.json())
+      .then(r => {
+        if (r.version) {
+          remote_version.value = r.version;
+        }
+      })
 })
 
 onBeforeUnmount(() => {

@@ -10,6 +10,7 @@ export default defineNuxtConfig({
         public: {
             backendUrl: process.env.NODE_ENV === 'production' ? 'https://api.chronometer.cloud' : 'http://localhost:8000',
             websocketBackendUrl: process.env.NODE_ENV === 'production' ? 'wss://api.chronometer.cloud' : 'ws://localhost:8000',
+            gitSha: process.env.WORKERS_CI_COMMIT_SHA || 'development',
         }
     },
     app: {

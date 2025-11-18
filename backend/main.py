@@ -345,3 +345,9 @@ async def readiness_probe() -> JSONResponse:
         return JSONResponse(status_code=200, content={"status": "ready"})
     else:
         return JSONResponse(status_code=503, content={"status": "not ready"})
+
+
+@app.get("/version")
+async def version() -> dict:
+    """Get the current version of the application."""
+    return {"version": GIT_SHA}
