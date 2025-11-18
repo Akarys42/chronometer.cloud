@@ -16,4 +16,6 @@ RUN poetry install --only main
 ARG git_sha="development"
 ENV GIT_SHA=$git_sha
 
-COPY backend i18n LICENSE ./
+COPY entrypoint.sh LICENSE ./
+COPY backend backend
+COPY i18n i18n
