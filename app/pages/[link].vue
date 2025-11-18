@@ -78,11 +78,11 @@
       <template #content>
         <div class="space-y-2 m-2 mb-10">
           <div>Real time delta: {{ real_time_delta }}ms</div>
+          <div>RTT: {{ average_rtt }}ms</div>
           <div>Permissions: {{ permissions }}</div>
           <div>Connection status: {{ connection_status }}</div>
           <div>Locale: {{ i18n.locale.value }}</div>
           <div>New timer duration: {{ new_timer_duration }}s</div>
-          <div>Endpoints: {{ backendUrl }} | {{ websocketBackendUrl }}</div>
           <div>Remote version: {{ remote_version }}</div>
           <div>Local version: {{ local_version }}</div>
         </div>
@@ -111,6 +111,7 @@ const new_page_color = ref<string | null>(null);
 const connection_status = ref<"connected" | "disconnected" | "lost">("disconnected");
 const is_not_found = ref(false);
 const real_time_delta = ref(0);
+const average_rtt = ref(0);
 const show_debug = ref(false);
 const remote_version = useState("unknown");
 const local_version = useRuntimeConfig().public.gitSha;
@@ -286,6 +287,7 @@ window.addEventListener("visibilitychange", () => {
 async function refresh_offset() {
   const sync = new TimeSync(websocketBackendUrl + "/time");
   real_time_delta.value = await sync.synchronize();
+  average_rtt.value = sync.getAverageRTT();
 }
 
 onMounted(async () => {

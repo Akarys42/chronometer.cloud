@@ -8,6 +8,7 @@ type TimeSample = {
 export class TimeSync {
 	private ws: WebSocket;
 	private samples: number[] = [];
+	private rttSamples: number[] = [];
 	private pendingResolve?: (offset: number) => void;
 	private readonly targetSamples: number;
 	private isReady = false;
@@ -54,12 +55,13 @@ export class TimeSync {
 		const { t1, t2, t3 } = JSON.parse(event.data) as TimeSample;
 
 		const offset = ((t2 - t1) + (t3 - t4)) / 2;
-		const delay = (t4 - t1) - (t3 - t2);
+		const rtt = (t4 - t1) - (t3 - t2);
 
 		// Filter out high-delay samples to improve accuracy
-		if (delay < 500) {
+		if (rtt < 500) {
 			this.samples.push(offset);
 		}
+		this.rttSamples.push(rtt);
 
 		if (this.samples.length >= this.targetSamples && !this.isReady) {
 			this.isReady = true;
@@ -72,6 +74,10 @@ export class TimeSync {
 	/** Get average offset (positive means server is ahead) */
 	private getAverageOffset(): number {
 		return this.samples.reduce((a, b) => a + b, 0) / this.samples.length;
+	}
+
+	public getAverageRTT(): number {
+		return this.rttSamples.reduce((a, b) => a + b, 0) / this.rttSamples.length;
 	}
 
 	/** Return server time based on current offset */
