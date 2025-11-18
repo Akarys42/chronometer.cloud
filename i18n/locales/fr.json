@@ -158,6 +158,12 @@
       }
     }
   },
+  "settings": {
+    "title": "Paramètres",
+    "language": "Langue",
+    "color": "Inverser les couleurs",
+    "debug": "Options développeur"
+  },
   "backend": {
     "default_page_name": "Chronomètres synchronisés dans le cloud",
     "default_timer_name": "Chronomètre"

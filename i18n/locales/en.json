@@ -158,6 +158,12 @@
       }
     }
   },
+  "settings": {
+    "title": "Settings",
+    "language": "Language",
+    "color": "Swap colors",
+    "debug": "Developer options"
+  },
   "backend": {
     "default_page_name": "Cloud-synchronized chronometers",
     "default_timer_name": "Chronometer"

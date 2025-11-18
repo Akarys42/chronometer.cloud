@@ -158,6 +158,12 @@
       }
     }
   },
+  "settings": {
+    "title": "Ajustes",
+    "language": "Idioma",
+    "color": "Intercambiar colores",
+    "debug": "Opciones de desarrollador"
+  },
   "backend": {
     "default_page_name": "Cronómetros sincronizados en la nube",
     "default_timer_name": "Cronómetro"

@@ -73,22 +73,20 @@
     </template>
   </USlideover>
 
-  <template>
-    <UDrawer v-model:open="show_debug">
-      <template #content>
-        <div class="space-y-2 m-2 mb-10">
-          <div>Real time delta: {{ real_time_delta }}ms</div>
-          <div>RTT: {{ average_rtt }}ms</div>
-          <div>Permissions: {{ permissions }}</div>
-          <div>Connection status: {{ connection_status }}</div>
-          <div>Locale: {{ i18n.locale.value }}</div>
-          <div>New timer duration: {{ new_timer_duration }}s</div>
-          <div>Remote version: {{ remote_version }}</div>
-          <div>Local version: {{ local_version }}</div>
-        </div>
-      </template>
-    </UDrawer>
-  </template>
+  <UDrawer v-model:open="show_debug">
+    <template #content>
+      <div class="space-y-2 m-2 mb-10">
+        <div>Real time delta: {{ real_time_delta }}ms</div>
+        <div>RTT: {{ average_rtt }}ms</div>
+        <div>Permissions: {{ permissions }}</div>
+        <div>Connection status: {{ connection_status }}</div>
+        <div>Locale: {{ i18n.locale.value }}</div>
+        <div>New timer duration: {{ new_timer_duration }}s</div>
+        <div>Remote version: {{ remote_version }}</div>
+        <div>Local version: {{ local_version }}</div>
+      </div>
+    </template>
+  </UDrawer>
 </template>
 
 <script setup lang="ts">
@@ -104,6 +102,8 @@ const toast = useToast();
 const route = useRoute();
 const appConfig = useAppConfig();
 const i18n = useI18n();
+const open_debug_panel = useState<undefined | (() => void)>('open-debug-panel', undefined)
+
 const new_timer_duration = ref(300);
 const are_settings_open = ref(false);
 const new_page_name = ref("");
@@ -111,10 +111,12 @@ const new_page_color = ref<string | null>(null);
 const connection_status = ref<"connected" | "disconnected" | "lost">("disconnected");
 const is_not_found = ref(false);
 const real_time_delta = ref(0);
+
 const average_rtt = ref(0);
 const show_debug = ref(false);
 const remote_version = useState("unknown");
 const local_version = useRuntimeConfig().public.gitSha;
+
 let websocket: ChronoSocket | null;
 let disconnect_toast_id: string | number | null;
 let lost_toast_id: string | number | null;
@@ -291,6 +293,10 @@ async function refresh_offset() {
 }
 
 onMounted(async () => {
+  open_debug_panel.value = () => {
+    show_debug.value = true;
+  }
+
   await check_status(fetch(backendUrl + "/page/" + route.params.link, {method: "GET"}), $t("page.toast.not_found.description"), true).then(async r => {
     if (r.status === 404) {
       is_not_found.value = true;
@@ -322,6 +328,8 @@ onMounted(async () => {
 })
 
 onBeforeUnmount(() => {
+  open_debug_panel.value = undefined;
+
   if (websocket) {
     websocket.close();
   }
