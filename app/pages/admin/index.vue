@@ -53,7 +53,7 @@
         },
       ]"/>
 
-      <div class="mt-3" v-if="!loading">
+      <div class="mt-3" v-if="!loading && (origin_over_time_rum_analytics !== undefined)">
         <UCard
             v-for="(analytics, origin) in origin_over_time_rum_analytics"
             :key="origin"
@@ -100,7 +100,7 @@
           </VisXYContainer>
         </UCard>
       </div>
-      <UProgress v-else class="mt-3"/>
+      <USkeleton v-else class="m-5 w-max-full h-80"/>
     </template>
   </UTabs>
 
