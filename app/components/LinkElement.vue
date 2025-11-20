@@ -14,9 +14,10 @@ const props = defineProps<{
   text: string,
   fragment: string,
 }>();
+const request_url = useRequestURL();
 
 const full_link = computed(() => {
-  const url = new URL(window.location.href);
+  const url = new URL(request_url);
   return url.origin + '/' + props.fragment;
 });
 </script>

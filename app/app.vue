@@ -64,6 +64,7 @@
 
 <script setup lang="ts">
 import { Logo } from '#components';
+import {addWindowEventListener} from "~/utils";
 
 const colorMode = useColorMode()
 const toast = useToast()
@@ -117,7 +118,7 @@ function open_debug() {
   }
 }
 
-window.addEventListener("visibilitychange", () => {
+addWindowEventListener("visibilitychange", () => {
   toast.clear()
 })
 </script>

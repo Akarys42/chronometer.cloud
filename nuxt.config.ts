@@ -3,7 +3,7 @@ import tailwindcss from "@tailwindcss/vite";
 
 
 export default defineNuxtConfig({
-    ssr: false,
+    ssr: true,
     modules: ['@nuxt/ui', '@nuxtjs/i18n'],
     css: ['~/assets/css/main.css'],
     runtimeConfig: {
@@ -49,4 +49,11 @@ export default defineNuxtConfig({
             tailwindcss(),
         ],
     },
+    icon: {
+        serverBundle: "local",
+        clientBundle: {
+            scan: true,
+            sizeLimitKb: 256,
+        }
+    }
 })

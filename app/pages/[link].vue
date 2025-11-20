@@ -92,7 +92,7 @@
 <script setup lang="ts">
 import {DurationInput, TailwindColorPicker} from "#components";
 import LinkElement from "~/components/LinkElement.vue";
-import {check_status} from "~/utils";
+import {addWindowEventListener, check_status} from "~/utils";
 import {ChronoSocket} from "~/socket";
 import {TimeSync} from "~/time_sync";
 
@@ -280,22 +280,24 @@ function connect_websocket() {
   websocket.connect();
 }
 
-window.addEventListener("visibilitychange", () => {
-  if (document.visibilityState === "visible" && connection_status.value === "lost" && websocket) {
-    websocket.connect()
-  }
-});
-
 async function refresh_offset() {
   const sync = new TimeSync(websocketBackendUrl + "/time");
   real_time_delta.value = await sync.synchronize();
   average_rtt.value = sync.getAverageRTT();
 }
 
+function reconnectOnVisibilityChange() {
+  if (document.visibilityState === "visible" && connection_status.value === "lost" && websocket) {
+    websocket.connect()
+  }
+}
+
 onMounted(async () => {
   open_debug_panel.value = () => {
     show_debug.value = true;
   }
+
+  window.addEventListener("visibilitychange", reconnectOnVisibilityChange);
 
   await check_status(fetch(backendUrl + "/page/" + route.params.link, {method: "GET"}), $t("page.toast.not_found.description"), true).then(async r => {
     if (r.status === 404) {
@@ -329,6 +331,8 @@ onMounted(async () => {
 
 onBeforeUnmount(() => {
   open_debug_panel.value = undefined;
+
+  window.removeEventListener("visibilitychange", reconnectOnVisibilityChange);
 
   if (websocket) {
     websocket.close();

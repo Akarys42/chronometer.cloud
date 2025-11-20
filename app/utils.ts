@@ -42,3 +42,15 @@ export function get_origin(): string {
 export function unique<T>(value: T, index: number, array: T[]): boolean {
     return array.indexOf(value) === index;
 }
+
+export function addWindowEventListener(
+    type: string,
+    listener: EventListenerOrEventListenerObject,
+    options?: boolean | AddEventListenerOptions
+): void {
+    if (import.meta.server) {
+        return;
+    }
+
+    window.addEventListener(type, listener, options);
+}
