@@ -38,11 +38,22 @@ export default defineNuxtConfig({
         preset: "cloudflare_module",
         cloudflare: {
             deployConfig: true,
-            nodeCompat: true
+            nodeCompat: true,
+            wrangler: {
+                name: "chronometer-cloud-frontend",
+                observability: {
+                    logs: {
+                        enabled: false,
+                        head_sampling_rate: 1,
+                        invocation_logs: true,
+                        persist: true
+                    } as any
+                },
+            }
         },
         prerender: {
             autoSubfolderIndex: false
-        }
+        },
     },
     vite: {
         plugins: [
