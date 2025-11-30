@@ -1,0 +1,165 @@
+{
+  "general": {
+    "title": "Cronometri sincronizzati nel cloud"
+  },
+  "footer": {
+    "author": "Creato con <3 da Ambre Bertucci",
+    "call_to_action": {
+      "text": "Ti piace lo strumento? ",
+      "link": "Offrimi un caffè"
+    }
+  },
+  "index": {
+    "features": {
+      "intro": {
+        "text": "Crea una {0} per il tuo evento. Otterrai:",
+        "strong": "pagina di cronometri condivisa"
+      },
+      "private_link": {
+        "name": "Link privato",
+        "text": " per controllare e gestire tutti i cronometri"
+      },
+      "public_link": {
+        "name": "Link pubblico",
+        "text": " per mostrare cronometri in sola lettura su qualsiasi schermo"
+      },
+      "usage": "Perfetto per eventi dal vivo o per coordinazione a distanza",
+      "flexibility": "Ogni pagina può contenere uno o più cronometri"
+    },
+    "button_create": "Crea la tua pagina di cronometri",
+    "disclaimer": "Nessun login, pagamento o pubblicità. Ora e per sempre.",
+    "toast": {
+      "create": {
+        "error": "Qualcosa è andato storto durante la creazione della pagina.",
+        "success": {
+          "title": "Fatto!",
+          "description": "Pagina creata con successo."
+        }
+      }
+    }
+  },
+  "page": {
+    "button_settings": "Impostazioni",
+    "status": {
+      "reconnecting": "Sei attualmente disconnesso dal server. Stiamo provando a riconnetterti...",
+      "disconnected": "Sei disconnesso dal server. Ricarica la pagina per riprovare."
+    },
+    "no_chronometer": "Nessun cronometro attualmente presente.",
+    "new_chronometer": {
+      "title": "Crea un nuovo cronometro",
+      "button_add": "Aggiungi"
+    },
+    "links": {
+      "title": "Link",
+      "private": "Link privato di modifica:",
+      "public": "Link pubblico di visualizzazione:"
+    },
+    "not_found": {
+      "title": "Questa pagina di cronometri non esiste",
+      "button_back": "Torna Indietro"
+    },
+    "settings": {
+      "title": "Impostazioni della pagina",
+      "name": "Nome della pagina",
+      "name_placeholder": "Inserisci il nome della pagina",
+      "color": "Colore della pagina",
+      "button_save": "Salva"
+    },
+    "toast": {
+      "invalid_duration": {
+        "title": "Durata non valida",
+        "description": "Inserisci una durata valida maggiore di 0 secondi."
+      },
+      "create": {
+        "error": "Qualcosa è andato storto durante la creazione del cronometro.",
+        "success": {
+          "title": "Fatto!",
+          "description": "Cronometro creato con successo."
+        }
+      },
+      "save": {
+        "error": "Qualcosa è andato storto durante il salvataggio delle impostazioni.",
+        "success": {
+          "title": "Fatto!",
+          "description": "Impostazioni salvate con successo."
+        }
+      },
+      "connect": {
+        "title": "Connesso",
+        "description": "Connessione al server avvenuta con successo. I cronometri si aggiorneranno in tempo reale."
+      },
+      "disconnect": {
+        "title": "Disconnesso",
+        "description": "La connessione al server è stata persa. Tentativo di riconnessione in corso..."
+      },
+      "lost": {
+        "title": "Riconnessione fallita",
+        "description": "Impossibile riconnettersi al server dopo vari tentativi. Ricarica la pagina per riprovare.",
+        "action_reconnect": "Riconnetti"
+      },
+      "not_found": {
+        "description": "Qualcosa è andato storto durante la ricerca della pagina."
+      }
+    }
+  },
+  "copy": {
+    "toast": {
+      "success": {
+        "title": "Copiato!",
+        "description": "Il testo è stato copiato negli appunti."
+      },
+      "error": {
+        "title": "Errore",
+        "description": "Impossibile copiare il testo."
+      }
+    }
+  },
+  "duration_input": {
+    "over_limit": "Il tempo massimo consentito è 23:59:59"
+  },
+  "qr": {
+    "button_download": "Scarica",
+    "button_print": "Stampa"
+  },
+  "share": {
+    "not_supported": {
+      "title": "Condivisione non supportata",
+      "description": "Il tuo browser non supporta la Web Share API."
+    }
+  },
+  "timer": {
+    "action": {
+      "pause": "Pausa",
+      "start": "Avvia",
+      "reset": "Reset",
+      "rename": "Rinomina",
+      "delete": "Elimina",
+      "start_pause": "@:timer.action.start / @:timer.action.pause"
+    },
+    "rename": {
+      "title": "Rinomina cronometro",
+      "placeholder": "Inserisci il nome del cronometro",
+      "button_rename": "@:timer.action.rename"
+    },
+    "more": "Altro",
+    "other_actions": "Altre azioni",
+    "error": {
+      "start": "Qualcosa è andato storto durante l'avvio del cronometro.",
+      "pause": "Qualcosa è andato storto durante la pausa del cronometro.",
+      "reset": "Qualcosa è andato storto durante il reset del cronometro.",
+      "add": "Qualcosa è andato storto durante l'aggiunta o la rimozione del tempo.",
+      "rename": "Qualcosa è andato storto durante la rinomina del cronometro.",
+      "delete": "Qualcosa è andato storto durante l'eliminazione del cronometro."
+    },
+    "toast": {
+      "delete": {
+        "title": "Cronometro eliminato",
+        "description": "Il cronometro è stato eliminato con successo."
+      }
+    }
+  },
+  "backend": {
+    "default_page_name": "Cronometri sincronizzati nel cloud",
+    "default_timer_name": "Cronometro"
+  }
+}
